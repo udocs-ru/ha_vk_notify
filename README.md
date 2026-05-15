@@ -184,43 +184,11 @@ action:
 
 > При нескольких записях интеграции Long Poll работает в одном экземпляре на сообщество. Поле `entity_id` в событии указывает, какой именно уведомитель связан с чатом — используйте его для ответа в тот же чат.
 
-### Примеры автоматизаций
+### 🤖 Примеры автоматизаций
 
-**Команда `/lights` переключает свет:**
+Мы собрали большую коллекцию готовых примеров: от простых текстовых ответов до сложных умных пультов с кнопками, каруселями, геолокацией и самоуничтожающимися сообщениями.
 
-```yaml
-automation:
-  trigger:
-    platform: event
-    event_type: vk_notify_command
-    event_data:
-      command: "lights"
-      peer_id: 123456789 # ID чата; уберите строку чтобы принимать из любого чата
-  action:
-    - action: light.toggle
-      target:
-        entity_id: light.living_room
-    - action: notify.send_message
-      target:
-        entity_id: notify.vk_notify
-      data:
-        message: "Свет переключён"
-```
-
-**Эхо-бот — отвечает на любой текст в тот же чат:**
-
-```yaml
-automation:
-  trigger:
-    platform: event
-    event_type: vk_notify_text
-  action:
-    - action: notify.send_message
-      target:
-        entity_id: "{{ trigger.event.data.entity_id }}"
-      data:
-        message: "Вы написали: {{ trigger.event.data.text }}"
-```
+👉 **[Посмотреть все примеры автоматизаций (AUTOMATIONS.md)](https://github.com/udocs-ru/ha_vk_notify/blob/main/AUTOMATIONS.md)**
 
 ## Получение токена сообщества VK
 
