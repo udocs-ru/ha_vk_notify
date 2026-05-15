@@ -1,5 +1,5 @@
 """
-VK Notify longpoll.py v1.5.2
+VK Notify longpoll.py v1.5.3
 Added: Detected "_ha_auto" flag for automatic spinner killing.
 """
 from __future__ import annotations
