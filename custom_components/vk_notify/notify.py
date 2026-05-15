@@ -1,5 +1,5 @@
 """
-VK Notify v1.5.3
+VK Notify v1.5.4
 Fixed: Dynamic auto_answer_callback injection for Carousels (templates).
 Fixed: Safe payload parsing and default kwargs fallback.
 """
