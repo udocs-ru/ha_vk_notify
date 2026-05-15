@@ -63,6 +63,7 @@
 
 > Если нужного чата нет в списке, получатель должен первым написать сообщение сообществу.
 > Чаты, в которые бот не может писать, отмечены символом ⛔ и недоступны для выбора.
+>Так же зная ID чата его можно добавить в ручную.
 
 ### Несколько записей интеграции
 
@@ -138,12 +139,18 @@ response_variable: result
 ### Использование в автоматизации
 
 ```yaml
-action:
-  - action: notify.send_message
-    target:
-      entity_id: notify.vk_notify
-    data:
-      message: "Входная дверь открыта"
+action: vk_notify.send_message
+metadata: {}
+target:
+  entity_id: notify.vk_notify_2000000000
+data:
+  parse_mode: html
+  disable_mentions: false
+  inline_keyboard: true
+  auto_answer_callback: true
+  title: Заголовок для тестового сообщения
+  message: Текст тестового сообщения
+
 ```
 
 ## Режим Long Poll — получение входящих сообщений
