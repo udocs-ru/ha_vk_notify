@@ -1,3 +1,8 @@
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
+[![GitHub Release](https://img.shields.io/github/v/release/udocs-ru/ha_vk_notify?style=for-the-badge)](https://github.com/udocs-ru/ha_vk_notify/releases)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-compatible-blue.svg?style=for-the-badge&logo=home-assistant)](https://www.home-assistant.io/)
+[![GitHub Stars](https://img.shields.io/github/stars/udocs-ru/ha_vk_notify.svg?style=for-the-badge)](https://github.com/udocs-ru/ha_vk_notify/stargazers)
+[![License](https://img.shields.io/github/license/udocs-ru/ha_vk_notify.svg?style=for-the-badge)](https://github.com/udocs-ru/ha_vk_notify/blob/main/LICENSE)
 # VK Notify
 
 Интеграция для Home Assistant для отправки уведомлений и получения входящих сообщений через VK.
