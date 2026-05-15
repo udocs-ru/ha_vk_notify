@@ -41,6 +41,7 @@ data:
 ```yaml
 alias: "Пульт управления светом и картой"
 description: "Отправка сообщений с разными типами кнопок"
+mode: single
 actions:
   - action: vk_notify.send_message
     data:
@@ -75,7 +76,6 @@ actions:
                 type: open_link
                 link: "[https://yandex.ru/maps/?pt=37.62,55.75&z=15&l=map](https://yandex.ru/maps/?pt=37.62,55.75&z=15&l=map)"
                 label: "Открыть карту 📍"
-mode: single
 ```
 
 </details>
@@ -89,6 +89,7 @@ mode: single
 ```yaml
 alias: "VK: Обработка кнопок пульта"
 description: "Реагирует на нажатия callback-кнопок из ВК"
+mode: parallel
 triggers:
   - trigger: event
     event_type: vk_notify_callback
@@ -110,7 +111,6 @@ actions:
           - action: light.turn_off
             target:
               entity_id: all
-mode: parallel
 ```
 
 </details>
@@ -124,6 +124,7 @@ mode: parallel
 ```yaml
 alias: "VK: Реакция на текстовые команды"
 description: "Отвечает на команду /status"
+mode: single
 triggers:
   - trigger: event
     event_type: vk_notify_command
@@ -135,7 +136,6 @@ actions:
     data:
       entity_id: notify.vk_notify_2000001234
       message: "🟢 Все системы работают в штатном режиме!"
-mode: single
 ```
 
 </details>
@@ -261,7 +261,7 @@ actions:
 
 </details>
 
-### 7. Удаление и редактирование отправленных сообщений(Самоуничтожающиеся сообщения (Таймер))
+### 7. Удаление и редактирование отправленных сообщений (Самоуничтожающиеся сообщения)
 
 Интеграция поддерживает два способа получить `message_id` только что отправленного сообщения. Выбирайте тот, который больше подходит для вашей задачи.
 
@@ -467,6 +467,7 @@ alias: "VK Тест 6: Двусторонняя связь (Тайпинг и П
 description: >-
   Демонстрация реакции бота на ваши действия в чате (только для личных
   сообщений)
+mode: single
 triggers:
   - trigger: event
     event_type: vk_notify_typing
@@ -485,23 +486,11 @@ actions:
               entity_id: notify.vk_notify_2000000008 # <-- Ваш личный VK ID(Бота), а не ID чата!
               message: 👀 О, вижу, ты что-то печатаешь! Жду команду...
           - delay: "00:00:10"
-      - conditions:
-          - condition: trigger
-            id:
-              - read
-              - typing
-        sequence:
-          - action: persistent_notification.create
-            data:
-              title: ВКонтакте (VK Notify)
-              message: Пользователь только что прочитал ваши сообщения! ✔️✔️
-          - delay: "00:00:10"
-mode: single
-              
+      
       # --- ВЕТКА 2: ЧТО ДЕЛАТЬ, ЕСЛИ ПОЛЬЗОВАТЕЛЬ ПРОЧИТАЛ ---
       - conditions:
           - condition: trigger
-            id: "read"
+            id: read
         sequence:
           # Отправляем уведомление в панель самого Home Assistant (колокольчик слева внизу)
           - action: persistent_notification.create
@@ -514,7 +503,7 @@ mode: single
 </details>
 
 ### 12. Всё в одном (все возможности в одной автоматизации)
-Автоматизация демонстратор всех возможностей данного форка. Не забудте изменить id 2000000003 на свои, а во втором блоке помимо этого задайте ID искомого пользователя VK для определения Имени и Фамилии.
+Автоматизация демонстратор всех возможностей данного форка. Не забудьте изменить id 2000000003 на свои, а во втором блоке помимо этого задайте ID искомого пользователя VK для определения Имени и Фамилии.
 
 <details>
   <summary><b>👨‍💻 Показать код YAML</b></summary>
@@ -681,7 +670,7 @@ actions:
         {{ r.get('conversation_message_id', 0) }}
   - delay: "00:00:02"
 
-# ==========================================
+  # ==========================================
   # 7. ГЕОЛОКАЦИЯ (КАРТА)
   # ==========================================
   - alias: "7. Отправка геолокации (Координаты Кремля)"
@@ -702,7 +691,7 @@ actions:
     target:
       entity_id: notify.vk_notify_2000000003
     data:
-      url: "https://www.home-assistant.io/images/default-social.png"
+      url: "[https://www.home-assistant.io/images/default-social.png](https://www.home-assistant.io/images/default-social.png)"
       message: "📸 Отправка картинки напрямую по ссылке URL."
       parse_mode: html
   - delay: "00:00:02"
@@ -786,18 +775,16 @@ actions:
 
 </details>
 
-### 13. Пример работы новых функций v1.5.0 (Снэкбары и Открепление)
-
-Эта автоматизация — наглядная демонстрация новых интерактивных фишек интеграции. В одном сценарии показана отправка сообщения, создание callback-клавиатуры, чтение ID отправленного сообщения, его закрепление, а затем — реакция на нажатие кнопки со всплывающим Снэкбаром, открепление и динамическое очищение кнопок.
-
-⚠️ **Внимание:** Перед копированием не забудьте заменить `notify.vk_notify_2000000003` во всех блоках на вашу реальную службу (содержащую ваш `peer_id`).
+### 13. Пример работы интерактивных функций (Снэкбары и Открепление)
+Эта автоматизация — наглядная демонстрация интерактивных фишек интеграции. В одном сценарии показана отправка сообщения, создание callback-клавиатуры, чтение ID отправленного сообщения, его закрепление, а затем — реакция на нажатие кнопки со всплывающим Снэкбаром, открепление и динамическое очищение кнопок.
 
 <details>
   <summary><b>👨‍💻 Показать код YAML</b></summary>
 
 ```yaml
-alias: "VK: Тест новых функций v1.5.0 (Снэкбар и Unpin)"
+alias: "VK: Тест функций (Снэкбар и Unpin)"
 description: Запустите автоматизацию вручную, чтобы получить тестовую кнопку.
+mode: parallel
 triggers:
   - trigger: event
     event_type: vk_notify_callback
@@ -812,13 +799,14 @@ actions:
             target:
               entity_id: notify.vk_notify_2000000003
             data:
-              title: 🛠 Тест версии 1.5.0
+              title: 🛠 Интерактивный тест
               message: >-
-                Я прислал тебе кнопку. Нажми её, чтобы проверить новые нативные Снэкбары!
+                Я прислал тебе кнопку. Нажми её, чтобы проверить нативные Снэкбары!
 
 
                 📌 <i>Кстати, я сейчас закреплю это сообщение.</i>
               parse_mode: html
+              auto_answer_callback: false # <-- Важно для корректной работы Снэкбара
               keyboard:
                 inline: true
                 buttons:
@@ -870,20 +858,18 @@ actions:
               keyboard:
                 inline: true
                 buttons: []
-mode: parallel
 ```
 </details>
 
 ---
 
-## Новые возможности начиная с версии v1.0.2
+## ✨ Базовые возможности (Шпаргалка по службам)
 
 <details>
-  <summary><b>📖 Как использовать новые функции в YAML (начиная с версии v1.0.2)</b></summary>
+  <summary><b>📖 Как вызывать отдельные службы в YAML</b></summary>
   
-
 #### 1. Имитация бурной деятельности («Бот печатает...»)
-Отлично подходит для скриптов, которые парсят данные или ждут ответа от железки (например, твоего ИБП). Бот будет показывать статус активности в течение 10 секунд.
+Отлично подходит для скриптов, которые парсят данные или ждут ответа от аппаратуры. Бот будет показывать статус активности в течение 10 секунд.
 
 ```yaml
 action: vk_notify.set_activity
@@ -893,14 +879,14 @@ data:
 ```
 
 #### 2. Реакции (Лайки) на сообщения
-Чтобы бот не засорял чат ответами "ОК, выключил", он может просто поставить лайк на твою команду. 
+Чтобы бот не засорял чат ответами "ОК, выключил", он может просто поставить лайк на вашу команду. 
 *(Коды реакций VK: 1 = 👍, 2 = 👎, 3 = ❤️, 4 = 🔥 и т.д.)*
 
 ```yaml
 action: vk_notify.send_reaction
 data:
   entity_id: notify.vk_notify_2000001234
-  conversation_message_id: "{{ trigger.event.data.conversation_message_id }}" # ID твоего сообщения из триггера
+  conversation_message_id: "{{ trigger.event.data.conversation_message_id }}" # ID сообщения из триггера
   reaction_id: 1 # Ставим лайк 👍
 ```
 
@@ -917,12 +903,12 @@ data:
 ```
 
 #### 4. Карусель (Шаблоны)
-Отправка красивых горизонтальных карточек. В нашем случае, мы добавили поддержку ключа `template` в стандартную службу `send_message`.
+Отправка красивых горизонтальных карточек с кнопками.
 
 ```yaml
 action: vk_notify.send_message
 data:
-  entity_id: notify.vk_notify_2000001234 # Укажи свой ID
+  entity_id: notify.vk_notify_2000001234 
   message: "💡 Выберите сценарий освещения для гостиной:"
   template:
     type: carousel
@@ -935,7 +921,7 @@ data:
               type: callback
               label: "Включить"
               payload: '{"action": "set_scene", "scene": "evening"}'
-            color: primary # Синяя кнопка
+            color: primary 
       
       # Карточка 2
       - title: "Яркий свет ☀️"
@@ -945,7 +931,7 @@ data:
               type: callback
               label: "Включить"
               payload: '{"action": "set_scene", "scene": "bright"}'
-            color: positive # Зеленая кнопка
+            color: positive 
       
       # Карточка 3
       - title: "Режим кино 🍿"
@@ -955,32 +941,7 @@ data:
               type: callback
               label: "Включить"
               payload: '{"action": "set_scene", "scene": "movie"}'
-            color: secondary # Серая кнопка
-```
-
-```yaml
-action: vk_notify.send_message
-data:
-  entity_id: notify.vk_notify_2000001234
-  message: "🎬 Выберите фильм для просмотра:"
-  template:
-    type: carousel
-    elements:
-      - title: "Интерстеллар"
-        description: "Фантастика, 2014"
-        photo_id: "-123456_7890" # Нужно заранее загрузить фото в ВК
-        buttons:
-          - action:
-              type: callback
-              label: "▶️ Включить на Plex"
-              payload: '{"action": "play_movie", "id": "1"}'
-      - title: "Дюна"
-        description: "Фантастика, 2021"
-        buttons:
-          - action:
-              type: callback
-              label: "▶️ Включить на Plex"
-              payload: '{"action": "play_movie", "id": "2"}'
+            color: secondary 
 ```
 
 #### 5. Закрепление сообщения
@@ -992,7 +953,7 @@ data:
   data:
     entity_id: notify.vk_notify_2000001234
     message: "🎛 Главный пульт управления домом"
-    # ... тут твоя клавиатура ...
+    # ... тут ваша клавиатура ...
   response_variable: msg_response
 
 # Затем закрепляем это сообщение
@@ -1003,7 +964,7 @@ data:
 ```
 
 #### 6. Голосовые сообщения
-Добавлена отдельная служба `send_voice`. Передай ей локальный путь к файлу `.ogg`.
+Используйте службу `send_voice`, передав ей локальный путь к аудиофайлу в формате `.ogg`.
 
 ```yaml
 action: vk_notify.send_voice
@@ -1011,7 +972,6 @@ data:
   entity_id: notify.vk_notify_2000001234
   file: "/config/www/audio/alarm.ogg"
 ```
-*(Небольшая ремарка по аудио: чтобы оно отображалось именно как «волна», а не как прикрепленный файл-документ, твой файл `helpers.py` должен уметь запрашивать у ВКонтакте сервер для загрузки именно голосовых сообщений `docs.getMessagesUploadServer?type=audio_message`. Если он этого не умеет, ВК всё равно примет файл, но покажет его просто как аудио-документ).*
 
 </details>
 
