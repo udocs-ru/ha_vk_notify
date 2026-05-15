@@ -1,52 +1,557 @@
-wall_post:
+# VK Notify services.yaml v1.5.2 (Terminology & Full UI Descriptions Update)
+send_message:
+  name: "Отправить сообщение"
+  description: Отправляет текстовое уведомление, медиа, координаты или карусель.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
   fields:
-    entity_id:
-      required: true
+    title:
+      name: Заголовок
+      description: Необязательный заголовок. Будет добавлен первой строкой с двойным отступом перед сообщением.
+      required: false
       selector:
-        entity:
-          integration: vk_notify
-          domain: notify
+        text: {}
     message:
+      name: Сообщение
+      description: "Основной текст уведомления. Поддерживает эмодзи и перенос строк."
+      required: true
       selector:
         text:
           multiline: true
-    file:
+    parse_mode:
+      name: Режим разбора
+      description: "Парсер текста сообщения. Выберите «Обычный текст», чтобы отправить текст «как есть» без преобразования тегов."
+      default: html
       selector:
-        text:
-
-
-send_file:
-  fields:
-    entity_id:
-      required: true
+        select:
+          mode: list
+          options:
+            - label: "HTML"
+              value: html
+            - label: "Markdown (Устаревший)"
+              value: markdown
+            - label: "MarkdownV2"
+              value: markdownv2
+            - label: "Обычный текст"
+              value: plain
+    attachment:
+      name: Вложение (Медиа)
+      description: "Готовая строка медиафайла из ВК, например: photo123_456 или doc-789_012."
+      required: false
       selector:
-        entity:
-          integration: vk_notify
-          domain: notify
-    file:
-      required: true
+        text: {}
+    disable_mentions:
+      name: Без звука для упоминаний
+      description: "Отключает только специфический пуш об упоминании (@id)."
+      required: false
+      default: false
       selector:
-        text:
-    message:
+        boolean: {}
+    inline_keyboard:
+      name: "Инлайн-клавиатура / Меню (клавиатура)"
+      description: >
+        ВКЛ Инлайн-клавиатура: Кнопки «встроены» прямо в само сообщение (в тот же пузырь, где текст). 
+        Они «тихие», потому что позволяют использовать тип callback, который не спамит текстом в чат. 
+        При прокрутке истории такие кнопки уезжают вверх вместе с сообщением.
+        ВЫКЛ Меню (Обычная клавиатура): Это те самые кнопки, которые заменяют собой стандартную клавиатуру 
+        телефона в нижней части экрана. Они «висят» внизу, пока ты их не удалишь или не заменишь на другие, 
+        независимо от того, как далеко ты прокрутил чат.
+      required: false
+      default: true
       selector:
-        text:
-          multiline: true
+        boolean: {}
+    auto_answer_callback:
+      name: Автоматически гасить кружок (Spinner)
+      description: "ВКЛ (Рекомендуется): Интеграция сама мгновенно остановит загрузку на кнопке. ВЫКЛ: Кружок будет висеть, пока вы не ответите службой 'answer_callback' в автоматизации (нужно для Снэкбаров)."
+      required: false
+      default: true
+      selector:
+        boolean: {}
+    keyboard:
+      name: Клавиатура
+      description: "JSON-объект с кнопками (inline или обычными)."
+      required: false
+      selector:
+        object: {}
+    template:
+      name: Шаблон / Карусель (Template)
+      description: "JSON-объект карусели. По требованиям VK API должен содержать параметр 'type': 'carousel' и массив карточек 'elements'."
+      required: false
+      selector:
+        object: {}
+    payload:
+      name: Скрытые данные (Payload)
+      description: "Невидимая строка данных, которая вернется боту при ответе или пересылке."
+      required: false
+      selector:
+        text: {}
+    lat:
+      name: Широта (Latitude)
+      description: Координата широты для отправки геолокации.
+      required: false
+      selector:
+        text: {}
+    long:
+      name: Долгота (Longitude)
+      description: Координата долготы для отправки геолокации.
+      required: false
+      selector:
+        text: {}
+    reply_to:
+      name: Ответить на сообщение
+      description: Идентификатор сообщения (cmid) в беседе, на которое нужно ответить.
+      required: false
+      selector:
+        text: {}
 
 send_photo:
+  name: "Отправить фото"
+  description: Отправляет фотографию через ВКонтакте.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
   fields:
-    entity_id:
-      required: true
-      selector:
-        entity:
-          integration: vk_notify
-          domain: notify
-    url:
-      selector:
-        text:
-    file:
-      selector:
-        text:
     message:
+      name: Подпись к фото
+      description: Необязательный текст под фотографией.
+      required: false
       selector:
         text:
           multiline: true
+    parse_mode:
+      name: Режим разбора
+      description: "Парсер текста сообщения."
+      default: html
+      selector:
+        select:
+          mode: list
+          options:
+            - label: "HTML"
+              value: html
+            - label: "Markdown (Устаревший)"
+              value: markdown
+            - label: "MarkdownV2"
+              value: markdownv2
+            - label: "Обычный текст"
+              value: plain
+    file:
+      name: Локальный путь к файлу
+      description: Например, /config/www/image.jpg
+      required: false
+      selector:
+        text: {}
+    url:
+      name: URL картинки
+      description: Прямая ссылка на картинку в интернете.
+      required: false
+      selector:
+        text: {}
+    disable_mentions:
+      name: Без звука для упоминаний
+      required: false
+      default: false
+      selector:
+        boolean: {}
+    payload:
+      name: Скрытые данные (Payload)
+      required: false
+      selector:
+        text: {}
+    inline_keyboard:
+      name: "Инлайн-клавиатура / Меню (клавиатура)"
+      default: true
+      selector:
+        boolean: {}
+    auto_answer_callback:
+      name: Автоматически гасить кружок
+      default: true
+      selector:
+        boolean: {}
+    keyboard:
+      name: Клавиатура
+      required: false
+      selector:
+        object: {}
+    reply_to:
+      name: Ответить на сообщение
+      required: false
+      selector:
+        text: {}
+
+send_file:
+  name: "Отправить файл"
+  description: Отправляет произвольный документ через ВКонтакте.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    file:
+      name: Локальный путь к файлу
+      description: Локальный путь к отправляемому файлу.
+      required: true
+      selector:
+        text: {}
+    message:
+      name: Подпись к файлу
+      required: false
+      selector:
+        text:
+          multiline: true
+    parse_mode:
+      name: Режим разбора
+      description: "Парсер текста сообщения."
+      default: html
+      selector:
+        select:
+          mode: list
+          options:
+            - label: "HTML"
+              value: html
+            - label: "Markdown (Устаревший)"
+              value: markdown
+            - label: "MarkdownV2"
+              value: markdownv2
+            - label: "Обычный текст"
+              value: plain
+    disable_mentions:
+      name: Без звука для упоминаний
+      required: false
+      default: false
+      selector:
+        boolean: {}
+    payload:
+      name: Скрытые данные (Payload)
+      required: false
+      selector:
+        text: {}
+    inline_keyboard:
+      name: "Инлайн-клавиатура / Меню (клавиатура)"
+      default: true
+      selector:
+        boolean: {}
+    auto_answer_callback:
+      name: Автоматически гасить кружок
+      default: true
+      selector:
+        boolean: {}
+    keyboard:
+      name: Клавиатура
+      required: false
+      selector:
+        object: {}
+    reply_to:
+      name: Ответить на сообщение
+      required: false
+      selector:
+        text: {}
+
+send_voice:
+  name: "Отправить голосовое сообщение"
+  description: Отправляет аудиофайл (.ogg) как нативное голосовое сообщение.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    file:
+      name: Локальный путь к аудиофайлу
+      required: true
+      selector:
+        text: {}
+    message:
+      name: Текст
+      description: Текст, который будет отправлен вместе с аудио.
+      required: false
+      selector:
+        text:
+          multiline: true
+    parse_mode:
+      name: Режим разбора
+      description: "Парсер текста сообщения."
+      default: html
+      selector:
+        select:
+          mode: list
+          options:
+            - label: "HTML"
+              value: html
+            - label: "Markdown (Устаревший)"
+              value: markdown
+            - label: "MarkdownV2"
+              value: markdownv2
+            - label: "Обычный текст"
+              value: plain
+    disable_mentions:
+      name: Без звука для упоминаний
+      required: false
+      default: false
+      selector:
+        boolean: {}
+    payload:
+      name: Скрытые данные (Payload)
+      required: false
+      selector:
+        text: {}
+    inline_keyboard:
+      name: "Инлайн-клавиатура / Меню (клавиатура)"
+      default: true
+      selector:
+        boolean: {}
+    auto_answer_callback:
+      name: Автоматически гасить кружок
+      default: true
+      selector:
+        boolean: {}
+    keyboard:
+      name: Клавиатура
+      required: false
+      selector:
+        object: {}
+    reply_to:
+      name: Ответить на сообщение
+      required: false
+      selector:
+        text: {}
+
+wall_post:
+  name: "Опубликовать на стене"
+  description: Отправляет новую запись на стену сообщества.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    message:
+      name: Текст поста
+      required: false
+      selector:
+        text:
+          multiline: true
+    file:
+      name: Локальный путь к фото
+      required: false
+      selector:
+        text: {}
+
+edit_message:
+  name: "Редактировать сообщение"
+  description: Изменяет текст, клавиатуру и вложения ранее отправленного сообщения.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    message:
+      name: Новый текст сообщения
+      required: true
+      selector:
+        text:
+          multiline: true
+    parse_mode:
+      name: Режим разбора
+      description: "Парсер текста сообщения."
+      default: html
+      selector:
+        select:
+          mode: list
+          options:
+            - label: "HTML"
+              value: html
+            - label: "Markdown (Устаревший)"
+              value: markdown
+            - label: "MarkdownV2"
+              value: markdownv2
+            - label: "Обычный текст"
+              value: plain
+    message_id:
+      name: Идентификатор сообщения (В личных сообщениях)
+      required: false
+      selector:
+        text: {}
+    conversation_message_id:
+      name: Идентификатор сообщения (В беседе)
+      required: false
+      selector:
+        text: {}
+    attachment:
+      name: Новое вложение
+      description: Строка медиа (photo123_456). Передайте пустую строку для удаления вложения.
+      required: false
+      selector:
+        text: {}
+    keyboard:
+      name: Новая клавиатура
+      required: false
+      selector:
+        object: {}
+    disable_mentions:
+      name: Без звука для упоминаний
+      required: false
+      selector:
+        boolean: {}
+
+delete_message:
+  name: "Удалить сообщение"
+  description: Удаляет сообщение у всех участников чата.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    conversation_message_id:
+      name: Идентификатор сообщения (cmid)
+      required: true
+      selector:
+        text: {}
+
+send_sticker:
+  name: "Отправить стикер"
+  description: Отправляет стикер ВКонтакте по его внутреннему номеру.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    sticker_id:
+      name: ID Стикера
+      description: Порядковый номер стикера (например, 3 - собака Спотти).
+      required: true
+      selector:
+        text: {}
+    reply_to:
+      name: Ответить на сообщение
+      required: false
+      selector:
+        text: {}
+
+edit_chat:
+  name: "Изменить название беседы"
+  description: Меняет заголовок группового чата (Для этого бот должен быть администратором).
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    title:
+      name: Новое название
+      description: Поддерживает эмодзи.
+      required: true
+      selector:
+        text: {}
+
+get_user_info:
+  name: "Получить инфо о пользователе"
+  description: Запрашивает данные пользователя. Возвращает Имя, Фамилию и статус Онлайн.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    user_id:
+      name: VK ID пользователя
+      description: Цифровой ID пользователя (или from_id из события).
+      required: true
+      selector:
+        text: {}
+
+set_activity:
+  name: "Статус активности"
+  description: Показывает в чате, что бот печатает или записывает голосовое сообщение.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    type:
+      name: Тип активности
+      required: true
+      selector:
+        select:
+          options:
+            - label: "Печатает текст..."
+              value: "typing"
+            - label: "Записывает голосовое..."
+              value: "audiomsg"
+
+send_reaction:
+  name: "Отправить реакцию (Лайк)"
+  description: Устанавливает эмодзи-реакцию на конкретное сообщение.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    conversation_message_id:
+      name: Идентификатор сообщения (cmid)
+      description: На какое сообщение поставить реакцию?
+      required: true
+      selector:
+        select:
+          options:
+            - label: "👍 Палец вверх (1)"
+              value: "1"
+            - label: "👎 Палец вниз (2)"
+              value: "2"
+            - label: "❤ Сердце (3)"
+              value: "3"
+            - label: "🔥 Огонь (4)"
+              value: "4"
+
+pin_message:
+  name: "Закрепить сообщение"
+  description: Закрепляет сообщение в шапке беседы.
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    conversation_message_id:
+      name: Идентификатор сообщения (cmid)
+      required: true
+      selector:
+        text: {}
+
+unpin_message:
+  name: "Открепить сообщение"
+  description: "Открепляет сообщение в шапке беседы. Если ID не передан, открепит текущее закрепленное."
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    conversation_message_id:
+      name: Идентификатор сообщения (cmid)
+      required: false
+      selector:
+        text: {}
+
+answer_callback:
+  name: "Ответить на нажатие (Снэкбар)"
+  description: "Останавливает загрузку на кнопке и (опционально) показывает всплывающее уведомление (снэкбар) в приложении ВК."
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    event_id:
+      name: Event ID
+      description: "Идентификатор события (из trigger.event.data.event_id)."
+      required: true
+      selector:
+        text: {}
+    user_id:
+      name: User ID
+      description: "VK ID пользователя, нажавшего кнопку (из trigger.event.data.user_id)."
+      required: true
+      selector:
+        text: {}
+    message:
+      name: Текст (Снэкбар)
+      description: "Текст уведомления (максимум 90 символов). Если оставить пустым, кнопка просто перестанет крутиться."
+      required: false
+      selector:
+        text: {}

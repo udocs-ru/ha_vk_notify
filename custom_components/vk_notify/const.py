@@ -1,16 +1,18 @@
+"""
+VK Notify  __init__.py v1.5.2
+Cleaned: All services moved to const.py
+"""
+
 DOMAIN = "vk_notify"
 
-# Ключи конфигурационной записи
 CONF_ACCESS_TOKEN = "access_token"
 CONF_PEER_ID = "peer_id"
 CONF_MODE = "mode"
 CONF_GROUP_ID = "group_id"
 
-# Режимы работы интеграции
-MODE_API = "api"          # только отправка сообщений через API
-MODE_LONGPOLL = "longpoll"  # отправка + получение входящих через Long Poll
+MODE_API = "api"
+MODE_LONGPOLL = "longpoll"
 
-# Эндпоинты VK API
 VK_API_URL = "https://api.vk.com/method/messages.send"
 VK_API_PHOTO_UPLOAD_SERVER = "https://api.vk.com/method/photos.getMessagesUploadServer"
 VK_API_PHOTO_SAVE = "https://api.vk.com/method/photos.saveMessagesPhoto"
