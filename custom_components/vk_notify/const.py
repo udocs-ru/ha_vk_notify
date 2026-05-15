@@ -1,5 +1,5 @@
 """
-VK Notify  __init__.py v1.5.2
+VK Notify  __init__.py v1.5.3
 Cleaned: All services moved to const.py
 """
 
