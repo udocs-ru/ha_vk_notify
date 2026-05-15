@@ -1,7 +1,7 @@
 {
   "domain": "vk_notify",
   "name": "VK Notify",
-  "codeowners": ["@Eugen417"],
+  "codeowners": ["@codewec", "@Eugen417"],
   "config_flow": true,
   "documentation": "https://github.com/udocs-ru/ha_vk_notify",
   "iot_class": "cloud_push",
