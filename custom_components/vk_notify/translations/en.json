@@ -1,9 +1,12 @@
 {
+  "_version": "en.json v1.5.3",
+  "_note": "What's new: fix.",
+  
   "config": {
     "step": {
       "user": {
         "title": "Set up VK Notify",
-        "description": "Enter your VK community bot token.\n\n[Documentation]({docs_url})",
+        "description": "Enter your VK community bot token.\n\n[Documentation]({docs_url})\n\n💡 **Version 1.5.2**\n📝 **What's new:** Added support for interactive buttons (Snackbars), fetching user profiles, and controlling automatic loading spinner dismissal.",
         "data": {
           "access_token": "Access Token",
           "name": "Name"
@@ -99,6 +102,10 @@
           "name": "Silent mentions",
           "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
         },
+        "auto_answer_callback": {
+          "name": "Auto-answer callback",
+          "description": "Set to false to prevent the button loading spinner from disappearing automatically (for manual control via Snackbars)."
+        },
         "payload": {
           "name": "Hidden data (Payload)",
           "description": "Invisible data string returned to the bot upon reply or forward."
@@ -141,6 +148,10 @@
           "name": "Silent mentions",
           "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
         },
+        "auto_answer_callback": {
+          "name": "Auto-answer callback",
+          "description": "Set to false to prevent the button loading spinner from disappearing automatically (for manual control via Snackbars)."
+        },
         "payload": {
           "name": "Hidden data (Payload)",
           "description": "Invisible data string returned to the bot upon reply or forward."
@@ -182,6 +193,10 @@
         "disable_mentions": {
           "name": "Silent mentions",
           "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
+        },
+        "auto_answer_callback": {
+          "name": "Auto-answer callback",
+          "description": "Set to false to prevent the button loading spinner from disappearing automatically (for manual control via Snackbars)."
         },
         "keyboard": {
           "name": "Keyboard",
@@ -367,6 +382,10 @@
           "name": "Silent mentions",
           "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
         },
+        "auto_answer_callback": {
+          "name": "Auto-answer callback",
+          "description": "Set to false to prevent the button loading spinner from disappearing automatically (for manual control via Snackbars)."
+        },
         "payload": {
           "name": "Hidden data (Payload)",
           "description": "Invisible data string returned to the bot upon reply or forward."
@@ -385,6 +404,10 @@
       "name": "Edit chat title",
       "description": "Changes the title of a group chat (Bot must be an admin!).",
       "fields": {
+        "entity_id": {
+          "name": "Entity",
+          "description": "VK Notify entity."
+        },
         "title": {
           "name": "New title",
           "description": "Supports emojis."
@@ -395,6 +418,10 @@
       "name": "Get user info",
       "description": "Requests user data. Returns First Name, Last Name, and Online status.",
       "fields": {
+        "entity_id": {
+          "name": "Entity",
+          "description": "VK Notify entity."
+        },
         "user_id": {
           "name": "VK User ID",
           "description": "Numeric User ID (or from_id from an event)."
@@ -405,6 +432,10 @@
       "name": "Send sticker",
       "description": "Sends a VK sticker by its internal ID.",
       "fields": {
+        "entity_id": {
+          "name": "Entity",
+          "description": "VK Notify entity."
+        },
         "sticker_id": {
           "name": "Sticker ID",
           "description": "Sequence number of the sticker (e.g., 3 for Spotty dog)."
