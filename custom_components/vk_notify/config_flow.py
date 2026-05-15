@@ -1,5 +1,5 @@
 """
-VK Notify config_flow.py v1.5.3
+VK Notify config_flow.py v1.5.4
 """
 from __future__ import annotations
 
