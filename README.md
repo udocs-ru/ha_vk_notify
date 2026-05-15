@@ -74,84 +74,11 @@
 Чтобы сменить чат у уже настроенной интеграции:
 **Настройки → Устройства и службы → VK Notify → ⋮ → Перенастроить**
 
-## Отправка сообщений
+### Примеры автоматизаций
 
-### Текстовое сообщение
+Мы собрали небольшую коллекцию готовых примеров: от простых текстовых ответов до сложных умных пультов с кнопками, каруселями, геолокацией и самоуничтожающимися сообщениями.
 
-```yaml
-action: notify.send_message
-target:
-  entity_id: notify.vk_notify
-data:
-  message: "Привет из Home Assistant!"
-  title: "Оповещение" # необязательно, добавляется первой строкой
-```
-
-### Отправка фото
-
-По URL:
-
-```yaml
-action: vk_notify.send_photo
-data:
-  entity_id: notify.vk_notify
-  url: "https://example.com/photo.jpg"
-  message: "Подпись к фото" # необязательно
-```
-
-Или с локальным файлом (путь должен быть добавлен в `allowlist_external_dirs`):
-
-```yaml
-action: vk_notify.send_photo
-data:
-  entity_id: notify.vk_notify
-  file: "/config/www/photo.jpg"
-  message: "Подпись к фото"
-```
-
-### Отправка файла
-
-```yaml
-action: vk_notify.send_file
-data:
-  entity_id: notify.vk_notify
-  file: "/config/www/report.pdf"
-  message: "Отчёт за день"  # необязательно
-```
-
-Поддерживаются любые форматы файлов размером до 200 МБ, кроме MP3 и исполняемых файлов (.exe и др.). OGG-файлы отправляются как голосовые сообщения. Путь должен быть добавлен в `allowlist_external_dirs`.
-
-### Публикация на стене сообщества
-
-```yaml
-action: vk_notify.wall_post
-data:
-  entity_id: notify.vk_notify
-  message: "Запись на стене из Home Assistant"
-  file: "/config/www/report.pdf"  # необязательно
-response_variable: result
-# result.post_id содержит ID опубликованной записи
-```
-
-> Ограничения VK API: загрузка фото на стену недоступна с токеном сообщества. OGG-файлы также нельзя прикрепить к записи на стене. Редактирование опубликованных записей (`wall.edit`) с токеном сообщества недоступно.
-
-
-### Использование в автоматизации
-
-```yaml
-action: vk_notify.send_message
-metadata: {}
-target:
-  entity_id: notify.vk_notify_2000000000
-data:
-  parse_mode: html
-  disable_mentions: false
-  inline_keyboard: true
-  auto_answer_callback: true
-  title: Заголовок для тестового сообщения
-  message: Текст тестового сообщения
-
-```
+👉 **[Посмотреть все примеры автоматизаций (AUTOMATIONS.md)](https://github.com/udocs-ru/ha_vk_notify/blob/main/AUTOMATIONS.md)**
 
 ## Режим Long Poll — получение входящих сообщений
 
@@ -191,11 +118,6 @@ data:
 
 > При нескольких записях интеграции Long Poll работает в одном экземпляре на сообщество. Поле `entity_id` в событии указывает, какой именно уведомитель связан с чатом — используйте его для ответа в тот же чат.
 
-### 🤖 Примеры автоматизаций
-
-Мы собрали большую коллекцию готовых примеров: от простых текстовых ответов до сложных умных пультов с кнопками, каруселями, геолокацией и самоуничтожающимися сообщениями.
-
-👉 **[Посмотреть все примеры автоматизаций (AUTOMATIONS.md)](https://github.com/udocs-ru/ha_vk_notify/blob/main/AUTOMATIONS.md)**
 
 ## Получение токена сообщества VK
 
