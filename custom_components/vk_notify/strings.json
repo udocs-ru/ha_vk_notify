@@ -1,417 +1,448 @@
 {
+  "_version": "strings.json v1.5.3",
+  "_note": "Что нового: fix.",
+  
   "config": {
     "step": {
       "user": {
-        "title": "Set up VK Notify",
-        "description": "Enter your VK community bot token.\n\n[Documentation]({docs_url})",
+        "title": "Настройка VK Notify",
+        "description": "Введите токен бота сообщества VK.\n\n[Документация]({docs_url})",
         "data": {
-          "access_token": "Access Token",
-          "name": "Name"
+          "access_token": "Токен доступа",
+          "name": "Название"
         },
         "data_description": {
-          "access_token": "VK community bot token with Messages permission",
-          "name": "Friendly name for this notification entity"
+          "access_token": "Токен бота сообщества VK с правом на отправку сообщений",
+          "name": "Отображаемое имя уведомителя"
         }
       },
       "select_mode": {
-        "title": "Connection mode",
-        "description": "Choose how the integration connects to VK.",
+        "title": "Режим подключения",
+        "description": "Выберите способ подключения интеграции к VK.",
         "data": {
-          "mode": "Mode"
+          "mode": "Режим"
         }
       },
       "select_chat": {
-        "title": "Select chat",
-        "description": "Select the chat to send notifications to.\n\nIf the desired chat is not in the list, the recipient must first send a message to the community.",
+        "title": "Выберите чат",
+        "description": "Выберите чат, в который будут отправляться уведомления.\n\nЕсли нужного чата нет в списке, получатель должен первым написать сообщение сообществу.",
         "data": {
-          "peer_id": "Chat"
+          "peer_id": "Чат"
         }
       },
       "reconfigure": {
-        "title": "Change chat",
-        "description": "Select a new chat to send notifications to.",
+        "title": "Изменить чат",
+        "description": "Выберите новый чат для отправки уведомлений.",
         "data": {
-          "peer_id": "Chat"
+          "peer_id": "Чат"
         }
       }
     },
     "error": {
-      "invalid_token": "Invalid access token or API error. Please check your token.",
-      "cannot_connect": "Failed to connect to VK API.",
-      "no_conversations": "No conversations found. Make sure the bot has at least one conversation.",
-      "group_id_required": "Could not detect community ID from the token. Make sure the token belongs to a community.",
-      "longpoll_no_access": "The token does not have permission to use Long Poll. Re-generate the community token with 'Community management' permission enabled.",
-      "chat_not_writable": "The bot cannot send messages to this chat. Select a different chat."
+      "invalid_token": "Неверный токен доступа или ошибка API. Проверьте токен.",
+      "cannot_connect": "Не удалось подключиться к VK API.",
+      "no_conversations": "Чаты не найдены. Убедитесь, что бот участвует хотя бы в одном чате.",
+      "group_id_required": "Не удалось определить ID сообщества из токена. Проверьте, что токен принадлежит сообществу.",
+      "longpoll_no_access": "Токен не имеет права использовать Long Poll. Перегенерируйте токен сообщества с включённым разрешением «Управление сообществом».",
+      "chat_not_writable": "Бот не может отправлять сообщения в этот чат. Выберите другой чат."
     },
     "abort": {
-      "already_configured": "This VK Notify instance is already configured.",
-      "reconfigure_successful": "Re-configuration was successful."
+      "already_configured": "Этот экземпляр VK Notify уже настроен.",
+      "reconfigure_successful": "Настройка успешно обновлена."
     }
   },
   "selector": {
     "mode": {
       "options": {
-        "api": "API — send only",
-        "longpoll": "Long Poll — send and receive incoming messages as HA events"
+        "api": "API — только отправка",
+        "longpoll": "Long Poll — отправка и получение входящих сообщений как событий HA"
       }
     }
   },
   "services": {
     "wall_post": {
-      "name": "Post to wall",
-      "description": "Publish a post on the VK community wall. Returns post_id.",
+      "name": "Опубликовать на стене",
+      "description": "Опубликовать запись на стене сообщества VK. Возвращает post_id.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "message": {
-          "name": "Post text",
-          "description": "Text of the post."
+          "name": "Текст поста",
+          "description": "Текст записи."
         },
         "file": {
-          "name": "Local file path",
-          "description": "Local path to a document to attach."
+          "name": "Локальный путь к фото",
+          "description": "Локальный путь к документу для прикрепления."
         }
       }
     },
     "send_file": {
-      "name": "Send file",
-      "description": "Send a file via VK.",
+      "name": "Отправить файл",
+      "description": "Отправляет произвольный документ через ВКонтакте.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "file": {
-          "name": "Local file path",
-          "description": "Local file path to send."
+          "name": "Локальный путь к файлу",
+          "description": "Локальный путь к отправляемому файлу."
         },
         "message": {
-          "name": "Caption",
-          "description": "Optional caption for the file."
+          "name": "Подпись к файлу",
+          "description": "Необязательная подпись к файлу."
         },
         "parse_mode": {
-          "name": "Parse Mode",
-          "description": "Message text parser. Choose 'Plain text' to send raw text without formatting."
+          "name": "Режим разбора",
+          "description": "Парсер текста сообщения. Выберите «Обычный текст», чтобы отправить текст «как есть» без преобразования тегов."
         },
         "disable_mentions": {
-          "name": "Silent mentions",
-          "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
+          "name": "Без звука для упоминаний",
+          "description": "Отключает только специфический пуш об упоминании (@id). Внимание: стандартное уведомление о новом сообщении всё равно придет, если звук в чате не отключен."
+        },
+        "auto_answer_callback": {
+          "name": "Автоответ на кнопки",
+          "description": "Установите false, чтобы кружок загрузки на кнопке не исчезал автоматически (для ручного управления через Снэкбары)."
         },
         "payload": {
-          "name": "Hidden data (Payload)",
-          "description": "Invisible data string returned to the bot upon reply or forward."
+          "name": "Скрытые данные (Payload)",
+          "description": "Невидимая строка данных, которая вернется боту при ответе или пересылке."
         },
         "keyboard": {
-          "name": "Keyboard",
-          "description": "JSON object for inline or regular keyboard."
+          "name": "Клавиатура",
+          "description": "JSON-объект с кнопками (inline или обычными)."
         },
         "reply_to": {
-          "name": "Reply to message",
-          "description": "Message ID (cmid) in the chat to reply to."
+          "name": "Ответить на сообщение",
+          "description": "Идентификатор сообщения (cmid) в беседе, на которое нужно ответить."
         }
       }
     },
     "send_photo": {
-      "name": "Send photo",
-      "description": "Send a photo via VK.",
+      "name": "Отправить фото",
+      "description": "Отправляет фотографию через ВКонтакте.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "message": {
-          "name": "Caption",
-          "description": "Optional text below the photo."
+          "name": "Подпись к фото",
+          "description": "Необязательный текст под фотографией."
         },
         "parse_mode": {
-          "name": "Parse Mode",
-          "description": "Message text parser. Choose 'Plain text' to send raw text without formatting."
+          "name": "Режим разбора",
+          "description": "Парсер текста сообщения. Выберите «Обычный текст», чтобы отправить текст «как есть» без преобразования тегов."
         },
         "file": {
-          "name": "Local file path",
-          "description": "E.g., /config/www/image.jpg"
+          "name": "Локальный путь к файлу",
+          "description": "Например, /config/www/image.jpg"
         },
         "url": {
-          "name": "Image URL",
-          "description": "Direct URL to the image."
+          "name": "URL картинки",
+          "description": "Прямая ссылка на картинку в интернете."
         },
         "disable_mentions": {
-          "name": "Silent mentions",
-          "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
+          "name": "Без звука для упоминаний",
+          "description": "Отключает только специфический пуш об упоминании (@id). Внимание: стандартное уведомление о новом сообщении всё равно придет, если звук в чате не отключен."
+        },
+        "auto_answer_callback": {
+          "name": "Автоответ на кнопки",
+          "description": "Установите false, чтобы кружок загрузки на кнопке не исчезал автоматически (для ручного управления через Снэкбары)."
         },
         "payload": {
-          "name": "Hidden data (Payload)",
-          "description": "Invisible data string returned to the bot upon reply or forward."
+          "name": "Скрытые данные (Payload)",
+          "description": "Невидимая строка данных, которая вернется боту при ответе или пересылке."
         },
         "keyboard": {
-          "name": "Keyboard",
-          "description": "JSON object for inline or regular keyboard."
+          "name": "Клавиатура",
+          "description": "JSON-объект с кнопками (inline или обычными)."
         },
         "reply_to": {
-          "name": "Reply to message",
-          "description": "Message ID (cmid) in the chat to reply to."
+          "name": "Ответить на сообщение",
+          "description": "Идентификатор сообщения (cmid) в беседе, на которое нужно ответить."
         }
       }
     },
     "send_message": {
-      "name": "Send message",
-      "description": "Sends a text notification, media, coordinates, or carousel.",
+      "name": "Отправить сообщение",
+      "description": "Отправляет текстовое уведомление, медиа, координаты или карусель.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "title": {
-          "name": "Title",
-          "description": "Optional title. Added as the first line before the message with a double line break."
+          "name": "Заголовок",
+          "description": "Необязательный заголовок. Будет добавлен первой строкой с двойным отступом перед сообщением."
         },
         "message": {
-          "name": "Message",
-          "description": "Main notification text. Supports emojis and line breaks."
+          "name": "Сообщение",
+          "description": "Основной текст уведомления. Поддерживает эмодзи и перенос строк."
         },
         "parse_mode": {
-          "name": "Parse Mode",
-          "description": "Message text parser. Choose 'Plain text' to send raw text without formatting."
+          "name": "Режим разбора",
+          "description": "Парсер текста сообщения. Выберите «Обычный текст», чтобы отправить текст «как есть» без преобразования тегов."
         },
         "attachment": {
-          "name": "Attachment (Media)",
-          "description": "Ready-made media string from VK, e.g., photo123_456 or doc-789_012."
+          "name": "Вложение (Медиа)",
+          "description": "Готовая строка медиафайла из ВК, например: photo123_456 или doc-789_012."
         },
         "disable_mentions": {
-          "name": "Silent mentions",
-          "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
+          "name": "Без звука для упоминаний",
+          "description": "Отключает только специфический пуш об упоминании (@id). Внимание: стандартное уведомление о новом сообщении всё равно придет, если звук в чате не отключен."
+        },
+        "auto_answer_callback": {
+          "name": "Автоответ на кнопки",
+          "description": "Установите false, чтобы кружок загрузки на кнопке не исчезал автоматически (для ручного управления через Снэкбары)."
         },
         "keyboard": {
-          "name": "Keyboard",
-          "description": "JSON object for inline or regular keyboard."
+          "name": "Клавиатура",
+          "description": "JSON-объект с кнопками (inline или обычными)."
         },
         "template": {
-          "name": "Template / Carousel",
-          "description": "JSON object for the carousel. Per VK API requirements, it must contain 'type': 'carousel' and an 'elements' array (max 10 items)."
+          "name": "Шаблон / Карусель (Template)",
+          "description": "JSON-объект карусели. По требованиям VK API должен содержать параметр 'type': 'carousel' и массив карточек 'elements' (не более 10 штук)."
         },
         "payload": {
-          "name": "Hidden data (Payload)",
-          "description": "Invisible data string returned to the bot upon reply or forward."
+          "name": "Скрытые данные (Payload)",
+          "description": "Невидимая строка данных, которая вернется боту при ответе или пересылке."
         },
         "lat": {
-          "name": "Latitude",
-          "description": "Latitude coordinate for geolocation."
+          "name": "Широта (Latitude)",
+          "description": "Координата широты для отправки геолокации."
         },
         "long": {
-          "name": "Longitude",
-          "description": "Longitude coordinate for geolocation."
+          "name": "Долгота (Longitude)",
+          "description": "Координата долготы для отправки геолокации."
         },
         "reply_to": {
-          "name": "Reply to message",
-          "description": "Message ID (cmid) in the chat to reply to."
+          "name": "Ответить на сообщение",
+          "description": "Идентификатор сообщения (cmid) в беседе, на которое нужно ответить."
         }
       }
     },
     "edit_message": {
-      "name": "Edit message",
-      "description": "Edits the text, keyboard, and attachments of a previously sent message.",
+      "name": "Редактировать сообщение",
+      "description": "Изменяет текст, клавиатуру и вложения ранее отправленного сообщения.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "message": {
-          "name": "New message text",
-          "description": "New text of the message."
+          "name": "Новый текст сообщения",
+          "description": "Новый текст сообщения."
         },
         "parse_mode": {
-          "name": "Parse Mode",
-          "description": "Message text parser. Choose 'Plain text' to send raw text without formatting."
+          "name": "Режим разбора",
+          "description": "Парсер текста сообщения. Выберите «Обычный текст», чтобы отправить текст «как есть» без преобразования тегов."
         },
         "message_id": {
-          "name": "Message ID (Private)",
-          "description": "Internal message ID (if known)."
+          "name": "Идентификатор сообщения (В личных сообщениях)",
+          "description": "Внутренний ID сообщения (если известен)."
         },
         "conversation_message_id": {
-          "name": "Conversation Message ID",
-          "description": "Message ID within the chat (cmid)."
+          "name": "Идентификатор сообщения (В беседе)",
+          "description": "ID сообщения внутри чата (cmid)."
         },
         "attachment": {
-          "name": "New attachment",
-          "description": "Media string (photo123_456). Pass an empty string to remove the attachment."
+          "name": "Новое вложение",
+          "description": "Строка медиа (photo123_456). Передайте пустую строку для удаления вложения."
         },
         "keyboard": {
-          "name": "New keyboard",
-          "description": "New keyboard (optional)."
+          "name": "Новая клавиатура",
+          "description": "Новая клавиатура (необязательно)."
         },
         "disable_mentions": {
-          "name": "Silent mentions",
-          "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
+          "name": "Без звука для упоминаний",
+          "description": "Отключает только специфический пуш об упоминании (@id). Внимание: стандартное уведомление о новом сообщении всё равно придет, если звук в чате не отключен."
         }
       }
     },
     "delete_message": {
-      "name": "Delete message",
-      "description": "Deletes a message for all chat participants.",
+      "name": "Удалить сообщение",
+      "description": "Удаляет сообщение у всех участников чата.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "conversation_message_id": {
-          "name": "Conversation Message ID",
-          "description": "Message ID within the chat (cmid)."
+          "name": "Идентификатор сообщения (cmid)",
+          "description": "ID сообщения внутри чата (cmid)."
         }
       }
     },
     "set_activity": {
-      "name": "Set activity status",
-      "description": "Shows typing or recording audio status in the chat.",
+      "name": "Статус активности",
+      "description": "Показывает в чате, что бот печатает или записывает голосовое сообщение.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "type": {
-          "name": "Activity type",
-          "description": "typing or audiomsg."
+          "name": "Тип активности",
+          "description": "typing (печатает) или audiomsg (записывает аудио)."
         }
       }
     },
     "send_reaction": {
-      "name": "Send reaction",
-      "description": "Sets an emoji reaction to a specific message.",
+      "name": "Отправить реакцию (Лайк)",
+      "description": "Устанавливает эмодзи-реакцию на конкретное сообщение.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "conversation_message_id": {
-          "name": "Conversation Message ID",
-          "description": "Message ID in the chat to react to."
+          "name": "Идентификатор сообщения (cmid)",
+          "description": "ID сообщения в беседе, на которое нужно поставить реакцию."
         },
         "reaction_id": {
-          "name": "Reaction",
-          "description": "Choose an emotion."
+          "name": "Реакция",
+          "description": "Выберите эмоцию."
         }
       }
     },
     "pin_message": {
-      "name": "Pin message",
-      "description": "Pins the specified message in the chat.",
+      "name": "Закрепить сообщение",
+      "description": "Закрепляет указанное сообщение в шапке диалога.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "conversation_message_id": {
-          "name": "Conversation Message ID",
-          "description": "Message ID within the chat (cmid)."
+          "name": "Идентификатор сообщения (cmid)",
+          "description": "ID сообщения внутри чата (cmid)."
         }
       }
     },
     "unpin_message": {
-      "name": "Unpin message",
-      "description": "Unpins a message in the chat. If no ID is provided, unpins the currently pinned message.",
+      "name": "Открепить сообщение",
+      "description": "Открепляет сообщение в шапке беседы. Если ID не передан, открепит текущее закрепленное.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "conversation_message_id": {
-          "name": "Conversation Message ID",
-          "description": "Message ID within the chat (cmid). If empty, unpins the last pinned message."
+          "name": "Идентификатор сообщения (cmid)",
+          "description": "ID сообщения внутри чата (cmid). Если оставить пустым, открепит последнее закрепленное."
         }
       }
     },
     "answer_callback": {
-      "name": "Answer Callback (Snackbar)",
-      "description": "Stops the loading spinner on an inline button and optionally shows a snackbar notification.",
+      "name": "Ответить на нажатие (Снэкбар)",
+      "description": "Останавливает загрузку на кнопке и (опционально) показывает всплывающее уведомление (снэкбар) в приложении ВК.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "event_id": {
           "name": "Event ID",
-          "description": "Event ID from trigger.event.data.event_id."
+          "description": "Идентификатор события (из trigger.event.data.event_id)."
         },
         "user_id": {
           "name": "User ID",
-          "description": "VK ID of the user who clicked the button (from trigger.event.data.user_id)."
+          "description": "VK ID пользователя, нажавшего кнопку (из trigger.event.data.user_id)."
         },
         "message": {
-          "name": "Message (Snackbar)",
-          "description": "Text to display in the snackbar (max 90 chars). If empty, the button just stops spinning."
+          "name": "Текст (Снэкбар)",
+          "description": "Текст уведомления (максимум 90 символов). Если оставить пустым, кнопка просто перестанет крутиться."
         }
       }
     },
     "send_voice": {
-      "name": "Send voice message",
-      "description": "Sends an audio file (.ogg) as a native voice message.",
+      "name": "Отправить голосовое сообщение",
+      "description": "Отправляет аудиофайл (.ogg) как нативное голосовое сообщение.",
       "fields": {
         "entity_id": {
-          "name": "Entity",
-          "description": "VK Notify entity."
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
         },
         "file": {
-          "name": "Local audio path",
-          "description": "Local path to the .ogg file on the HA server."
+          "name": "Локальный путь к аудиофайлу",
+          "description": "Локальный путь к файлу .ogg на сервере HA."
         },
         "message": {
-          "name": "Text",
-          "description": "Text to be sent alongside the audio."
+          "name": "Текст",
+          "description": "Текст, который будет отправлен вместе с аудио."
         },
         "parse_mode": {
-          "name": "Parse Mode",
-          "description": "Message text parser. Choose 'Plain text' to send raw text without formatting."
+          "name": "Режим разбора",
+          "description": "Парсер текста сообщения. Выберите «Обычный текст», чтобы отправить текст «как есть» без преобразования тегов."
         },
         "disable_mentions": {
-          "name": "Silent mentions",
-          "description": "Disables only the specific mention push (@id). Note: The standard new message notification will still arrive unless the chat is muted."
+          "name": "Без звука для упоминаний",
+          "description": "Отключает только специфический пуш об упоминании (@id). Внимание: стандартное уведомление о новом сообщении всё равно придет, если звук в чате не отключен."
+        },
+        "auto_answer_callback": {
+          "name": "Автоответ на кнопки",
+          "description": "Установите false, чтобы кружок загрузки на кнопке не исчезал автоматически (для ручного управления через Снэкбары)."
         },
         "payload": {
-          "name": "Hidden data (Payload)",
-          "description": "Invisible data string returned to the bot upon reply or forward."
+          "name": "Скрытые данные (Payload)",
+          "description": "Невидимая строка данных, которая вернется боту при ответе или пересылке."
         },
         "keyboard": {
-          "name": "Keyboard",
-          "description": "JSON object for inline or regular keyboard."
+          "name": "Клавиатура",
+          "description": "JSON-объект с кнопками (inline или обычными)."
         },
         "reply_to": {
-          "name": "Reply to message",
-          "description": "Message ID (cmid) in the chat to reply to."
+          "name": "Ответить на сообщение",
+          "description": "Идентификатор сообщения (cmid) в беседе, на которое нужно ответить."
         }
       }
     },
     "edit_chat": {
-      "name": "Edit chat title",
-      "description": "Changes the title of a group chat (Bot must be an admin!).",
+      "name": "Изменить название беседы",
+      "description": "Меняет заголовок группового чата (Для этого бот должен быть администратором).",
       "fields": {
+        "entity_id": {
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
+        },
         "title": {
-          "name": "New title",
-          "description": "Supports emojis."
+          "name": "Новое название",
+          "description": "Поддерживает эмодзи."
         }
       }
     },
     "get_user_info": {
-      "name": "Get user info",
-      "description": "Requests user data. Returns First Name, Last Name, and Online status.",
+      "name": "Получить инфо о пользователе",
+      "description": "Запрашивает данные пользователя. Возвращает Имя, Фамилию и статус Онлайн.",
       "fields": {
+        "entity_id": {
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
+        },
         "user_id": {
-          "name": "VK User ID",
-          "description": "Numeric User ID (or from_id from an event)."
+          "name": "VK ID пользователя",
+          "description": "Цифровой ID пользователя (или from_id из события)."
         }
       }
     },
     "send_sticker": {
-      "name": "Send sticker",
-      "description": "Sends a VK sticker by its internal ID.",
+      "name": "Отправить стикер",
+      "description": "Отправляет стикер ВКонтакте по его внутреннему номеру.",
       "fields": {
+        "entity_id": {
+          "name": "Объект",
+          "description": "Уведомитель VK Notify."
+        },
         "sticker_id": {
-          "name": "Sticker ID",
-          "description": "Sequence number of the sticker (e.g., 3 for Spotty dog)."
+          "name": "ID Стикера",
+          "description": "Порядковый номер стикера (например, 3 - собака Спотти)."
         },
         "reply_to": {
-          "name": "Reply to message",
-          "description": "Message ID (cmid) in the chat to reply to."
+          "name": "Ответить на сообщение",
+          "description": "Идентификатор сообщения (cmid) в беседе, на которое нужно ответить."
         }
       }
     }
