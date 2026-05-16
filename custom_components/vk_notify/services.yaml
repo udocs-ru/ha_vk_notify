@@ -1,4 +1,4 @@
-# VK Notify services.yaml v1.5.4 (Terminology & Full UI Descriptions Update)
+# VK Notify services.yaml v1.5.5 (Terminology & Full UI Descriptions Update)
 send_message:
   name: "Отправить сообщение"
   description: Отправляет текстовое уведомление, медиа, координаты или карусель.
@@ -487,19 +487,49 @@ send_reaction:
   fields:
     conversation_message_id:
       name: Идентификатор сообщения (cmid)
-      description: На какое сообщение поставить реакцию?
+      description: ID сообщения в беседе, на которое нужно поставить реакцию.
+      required: true
+      selector:
+        text: {}
+    reaction_id:
+      name: Реакция
+      description: Выберите эмоцию (для ввода своего ID перейдите в режим YAML).
       required: true
       selector:
         select:
           options:
-            - label: "👍 Палец вверх (1)"
+            - label: "❤️ Сердце (1)"
               value: "1"
-            - label: "👎 Палец вниз (2)"
+            - label: "🔥 Огонь (2)"
               value: "2"
-            - label: "❤ Сердце (3)"
+            - label: "😂 Смех до слез (3)"
               value: "3"
-            - label: "🔥 Огонь (4)"
+            - label: "👍 Палец вверх (4)"
               value: "4"
+            - label: "💩 Какашка (5)"
+              value: "5"
+            - label: "❓ Вопросы (6)"
+              value: "6"
+            - label: "😭 Громкий плач (7)"
+              value: "7"
+            - label: "😡 Гнев (8)"
+              value: "8"
+            - label: "👎 Палец вниз (9)"
+              value: "9"
+            - label: "👌 Окей (10)"
+              value: "10"
+            - label: "😄 Улыбка (11)"
+              value: "11"
+            - label: "🤔 Задумчивость (12)"
+              value: "12"
+            - label: "🙏 Спасибо (13)"
+              value: "13"
+            - label: "😘 Поцелуй (14)"
+              value: "14"
+            - label: "😍 Влюбленные глаза (15)"
+              value: "15"
+            - label: "🎉 Праздник (16)"
+              value: "16"
 
 pin_message:
   name: "Закрепить сообщение"
