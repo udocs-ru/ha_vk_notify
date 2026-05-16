@@ -8,8 +8,9 @@
 
 ```yaml
 action: vk_notify.send_message
-data:
+target:
   entity_id: notify.vk_notify_2000001234
+data:
   message: "Выберите устройство:"
   keyboard:
     inline: true
@@ -44,8 +45,9 @@ description: "Отправка сообщений с разными типами
 mode: single
 actions:
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       message: "🎛 Пульт управления светом:"
       keyboard:
         inline: true
@@ -66,15 +68,16 @@ actions:
                 payload: '{"action": "all_off"}'
               color: negative
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       message: "Нажми на кнопку, чтобы увидеть объект на карте:"
       keyboard:
         inline: true
         buttons:
           - - action:
                 type: open_link
-                link: "[https://yandex.ru/maps/?pt=37.62,55.75&z=15&l=map](https://yandex.ru/maps/?pt=37.62,55.75&z=15&l=map)"
+                link: "https://yandex.ru/maps/?pt=37.62,55.75&z=15&l=map"
                 label: "Открыть карту 📍"
 ```
 
@@ -133,8 +136,9 @@ triggers:
       peer_id: 2000001234
 actions:
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       message: "🟢 Все системы работают в штатном режиме!"
 ```
 
@@ -175,8 +179,9 @@ actions:
             id: call_remote
         sequence:
           - action: vk_notify.send_message
-            data:
+            target:
               entity_id: notify.vk_notify_2000001234
+            data:
               message: "🎛 **Главный пульт управления**"
               keyboard:
                 inline: true
@@ -211,8 +216,9 @@ actions:
                   
                   # 3. Редактируем сообщение (меняем цвет и текст)
                   - action: vk_notify.edit_message
-                    data:
+                    target:
                       entity_id: notify.vk_notify_2000001234
+                    data:
                       conversation_message_id: "{{ trigger.event.data.conversation_message_id }}"
                       message: "🎛 **Главный пульт управления**"
                       keyboard:
@@ -253,8 +259,9 @@ actions:
             value_template: "{{ trigger.event.data.payload.action == 'close_remote' }}"
         sequence:
           - action: vk_notify.delete_message
-            data:
+            target:
               entity_id: notify.vk_notify_2000001234
+            data:
               # Берем ID сообщения прямо из клика по кнопке
               conversation_message_id: "{{ trigger.event.data.conversation_message_id }}"
 ```
@@ -277,15 +284,17 @@ actions:
 alias: "VK: Быстрое удаление"
 actions:
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       message: "⏳ Завариваю кофе..."
       
   - delay: "00:00:05" # Короткая задержка безопасна
   
   - action: vk_notify.delete_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       # Просто берем ID из атрибута:
       message_id: "{{ state_attr('notify.vk_notify_2000001234', 'last_message_id') }}"
 ```
@@ -302,8 +311,9 @@ alias: "VK: Надежный таймер (1 час)"
 actions:
   # 1. Отправляем и кладем ответ ВК в локальную переменную sent_result
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       message: "👕 Стиральная машина закончила стирку!"
     response_variable: sent_result
     
@@ -318,8 +328,9 @@ actions:
         value_template: "{{ bot_msg_id > 0 }}"
     then:
       - action: vk_notify.delete_message
-        data:
+        target:
           entity_id: notify.vk_notify_2000001234
+        data:
           message_id: "{{ bot_msg_id }}"
 
 ```
@@ -347,8 +358,9 @@ condition:
       {{ trigger.event.data.get('command', '') | lower in ['пинг', 'ping'] }}
 action:
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000000003
+    data:
       message: 🏓 Понг! Бот на связи и умеет отвечать на сообщения.
       reply_to: "{{ trigger.event.data.get('conversation_message_id') }}"
 ```
@@ -375,8 +387,9 @@ conditions:
       in trigger.event.data.get('text', '') | lower }}
 actions:
   - action: vk_notify.get_user_info
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       user_id: "1234567"  # замените на нужный VK ID
     response_variable: vk_user
   - variables:
@@ -393,8 +406,9 @@ actions:
           Скрыто настройками приватности
         {% endif %}
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       message: |
         🕵️‍♂️ **Досье пользователя:**
         👤 Имя: {{ info.get('full_name', 'Неизвестно') }}
@@ -422,8 +436,9 @@ conditions:
     value_template: "{{ 'онлайн' in trigger.event.data.get('command', '') | lower }}"
 actions:
   - action: vk_notify.get_user_info
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       user_id: "{{ trigger.event.data.from_id }}"
     response_variable: vk_user
   - variables:
@@ -440,8 +455,9 @@ actions:
           Скрыто настройками приватности
         {% endif %}
   - action: vk_notify.send_message
-    data:
+    target:
       entity_id: notify.vk_notify_2000001234
+    data:
       message: |
         🕵️‍♂️ **Результат пробива:**
         👤 Имя: {{ info.get('full_name', 'Неизвестно') }}
@@ -482,8 +498,9 @@ actions:
             id: typing
         sequence:
           - action: vk_notify.send_message
-            data:
+            target:
               entity_id: notify.vk_notify_2000000008 # <-- Ваш личный VK ID(Бота), а не ID чата!
+            data:
               message: 👀 О, вижу, ты что-то печатаешь! Жду команду...
           - delay: "00:00:10"
       
@@ -679,8 +696,8 @@ actions:
       entity_id: notify.vk_notify_2000000003
     data:
       message: "📍 Координаты (Московский Кремль):"
-      lat: "55.7520"
-      long: "37.6175"
+      lat: 55.7520
+      long: 37.6175
   - delay: "00:00:02"
 
   # ==========================================
@@ -691,7 +708,7 @@ actions:
     target:
       entity_id: notify.vk_notify_2000000003
     data:
-      url: "[https://www.home-assistant.io/images/default-social.png](https://www.home-assistant.io/images/default-social.png)"
+      url: "https://www.home-assistant.io/images/default-social.png"
       message: "📸 Отправка картинки напрямую по ссылке URL."
       parse_mode: html
   - delay: "00:00:02"
@@ -744,19 +761,23 @@ actions:
   #
   # - alias: "11.1. Статус 'Записывает голосовое...'"
   #   action: vk_notify.set_activity
-  #   target: { entity_id: notify.vk_notify_2000000003 }
-  #   data: { type: audiomsg }
+  #   target: 
+  #     entity_id: notify.vk_notify_2000000003
+  #   data: 
+  #     type: audiomsg
   # - delay: "00:00:02"
   #
   # - alias: "11.2. Отправка голосового сообщения (.ogg)"
   #   action: vk_notify.send_voice
-  #   target: { entity_id: notify.vk_notify_2000000003 }
+  #   target: 
+  #     entity_id: notify.vk_notify_2000000003
   #   data:
   #     file: "/config/www/test_voice.ogg"
   #
   # - alias: "11.3. Отправка файла документа"
   #   action: vk_notify.send_file
-  #   target: { entity_id: notify.vk_notify_2000000003 }
+  #   target: 
+  #     entity_id: notify.vk_notify_2000000003
   #   data:
   #     file: "/config/www/report.pdf"
   #     message: "📄 Отчет о тестировании"
@@ -873,21 +894,23 @@ actions:
 
 ```yaml
 action: vk_notify.set_activity
-data:
+target:
   entity_id: notify.vk_notify_2000001234
+data:
   type: typing # или 'audiomsg', если бот "записывает голосовое"
 ```
 
 #### 2. Реакции (Лайки) на сообщения
 Чтобы бот не засорял чат ответами "ОК, выключил", он может просто поставить лайк на вашу команду. 
-*(Коды реакций VK: 1 = 👍, 2 = 👎, 3 = ❤️, 4 = 🔥 и т.д.)*
+*(Коды реакций VK: 1 = ❤️, 2 = 🔥, 3 = 😂, 4 = 👍 и т.д.)*
 
 ```yaml
 action: vk_notify.send_reaction
-data:
+target:
   entity_id: notify.vk_notify_2000001234
+data:
   conversation_message_id: "{{ trigger.event.data.conversation_message_id }}" # ID сообщения из триггера
-  reaction_id: 1 # Ставим лайк 👍
+  reaction_id: 4 # Ставим Класс 👍
 ```
 
 #### 3. Геометки (Отправка координат)
@@ -895,11 +918,12 @@ data:
 
 ```yaml
 action: vk_notify.send_message
-data:
+target:
   entity_id: notify.vk_notify_2000001234
+data:
   message: "📍 Автомобиль припаркован здесь:"
-  lat: "55.751244"
-  long: "37.618423"
+  lat: 55.751244
+  long: 37.618423
 ```
 
 #### 4. Карусель (Шаблоны)
@@ -907,8 +931,9 @@ data:
 
 ```yaml
 action: vk_notify.send_message
-data:
+target:
   entity_id: notify.vk_notify_2000001234 
+data:
   message: "💡 Выберите сценарий освещения для гостиной:"
   template:
     type: carousel
@@ -950,16 +975,18 @@ data:
 ```yaml
 # Сначала отправляем сообщение и получаем ответ
 - action: vk_notify.send_message
-  data:
+  target:
     entity_id: notify.vk_notify_2000001234
+  data:
     message: "🎛 Главный пульт управления домом"
     # ... тут ваша клавиатура ...
   response_variable: msg_response
 
 # Затем закрепляем это сообщение
 - action: vk_notify.pin_message
-  data:
+  target:
     entity_id: notify.vk_notify_2000001234
+  data:
     conversation_message_id: "{{ (msg_response.values() | first).conversation_message_id }}"
 ```
 
@@ -968,8 +995,9 @@ data:
 
 ```yaml
 action: vk_notify.send_voice
-data:
+target:
   entity_id: notify.vk_notify_2000001234
+data:
   file: "/config/www/audio/alarm.ogg"
 ```
 
