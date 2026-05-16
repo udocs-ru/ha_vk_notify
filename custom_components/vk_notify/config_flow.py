@@ -1,6 +1,7 @@
 """
-VK Notify config_flow.py v1.5.4
+VK Notify config_flow.py v1.5.5
 """
+
 from __future__ import annotations
 
 import voluptuous as vol
@@ -27,7 +28,6 @@ STEP_TOKEN_SCHEMA = vol.Schema(
     }
 )
 
-
 async def _detect_group_id(hass, access_token: str) -> int | None:
     """Try to auto-detect group_id from a community token via groups.getById."""
     session = async_get_clientsession(hass)
@@ -44,7 +44,6 @@ async def _detect_group_id(hass, access_token: str) -> int | None:
         pass
     return None
 
-
 async def _check_longpoll_access(hass, access_token: str, group_id: int) -> bool:
     """Return True if the token can call groups.getLongPollServer."""
     session = async_get_clientsession(hass)
@@ -58,7 +57,6 @@ async def _check_longpoll_access(hass, access_token: str, group_id: int) -> bool
     except Exception:
         return False
 
-
 async def _validate_token(hass, access_token: str) -> bool:
     session = async_get_clientsession(hass)
     try:
@@ -70,7 +68,6 @@ async def _validate_token(hass, access_token: str) -> bool:
             return "error" not in data
     except Exception:
         return False
-
 
 def _build_conversations(response: dict) -> tuple[dict[str, str], set[str]]:
     profiles = {p["id"]: f"{p['first_name']} {p['last_name']}" for p in response.get("profiles", [])}
@@ -103,7 +100,6 @@ def _build_conversations(response: dict) -> tuple[dict[str, str], set[str]]:
 
     return all_options, writable_ids
 
-
 async def _get_conversations(hass, access_token: str) -> tuple[dict[str, str], set[str]]:
     session = async_get_clientsession(hass)
     async with session.get(
@@ -116,7 +112,6 @@ async def _get_conversations(hass, access_token: str) -> tuple[dict[str, str], s
         return {}, set()
 
     return _build_conversations(data["response"])
-
 
 class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
@@ -197,7 +192,6 @@ class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         if user_input is not None:
             peer_id_str = str(user_input[CONF_PEER_ID]).strip()
             
-            # Подхватываем имя, если чат есть в списке, иначе просто пишем ID
             chat_label = all_options.get(peer_id_str, f"Чат {peer_id_str}")
             card_title = f"{self._name}: {chat_label}"
 
@@ -212,7 +206,6 @@ class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 },
             )
 
-        # Подготавливаем опции для выпадающего списка
         options = [{"value": str(k), "label": v} for k, v in all_options.items()]
 
         return self.async_show_form(
