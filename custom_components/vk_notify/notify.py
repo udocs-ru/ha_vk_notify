@@ -1,7 +1,6 @@
 """
-VK Notify v1.5.4
-Fixed: Dynamic auto_answer_callback injection for Carousels (templates).
-Fixed: Safe payload parsing and default kwargs fallback.
+VK Notify notify.py v1.5.5
+Added: Flexible types (INT_STR) for template compatibility.
 """
 from __future__ import annotations
 
@@ -38,13 +37,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     async_add_entities([VkNotifyEntity(hass, entry)])
     platform = entity_platform.async_get_current_platform()
 
+    INT_STR = vol.Any(cv.positive_int, cv.string)
+
     COMMON_FIELDS = {
         vol.Optional("disable_mentions"): cv.boolean,
         vol.Optional("payload"): cv.string,
         vol.Optional("keyboard"): dict,
         vol.Optional("inline_keyboard"): cv.boolean,
         vol.Optional("auto_answer_callback"): cv.boolean,
-        vol.Optional("reply_to"): cv.positive_int,
+        vol.Optional("reply_to"): INT_STR,
         vol.Optional("parse_mode", default="html"): vol.In(["html", "markdown", "markdownv2", "plain"])
     }
 
@@ -52,14 +53,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     platform.async_register_entity_service("send_photo", {vol.Optional("url"): cv.string, vol.Optional("file"): cv.string, vol.Optional("message"): cv.string, **COMMON_FIELDS}, "async_send_photo", supports_response=SupportsResponse.OPTIONAL)
     platform.async_register_entity_service("send_file", {vol.Required("file"): cv.string, vol.Optional("message"): cv.string, **COMMON_FIELDS}, "async_send_file", supports_response=SupportsResponse.OPTIONAL)
     platform.async_register_entity_service("send_voice", {vol.Required("file"): cv.string, vol.Optional("message"): cv.string, **COMMON_FIELDS}, "async_send_voice", supports_response=SupportsResponse.OPTIONAL)
-    platform.async_register_entity_service("edit_message", {vol.Required("message"): cv.string, vol.Optional("message_id"): cv.positive_int, vol.Optional("conversation_message_id"): cv.positive_int, vol.Optional("attachment"): cv.string, vol.Optional("keyboard"): dict, vol.Optional("disable_mentions"): cv.boolean, vol.Optional("parse_mode", default="html"): vol.In(["html", "markdown", "markdownv2", "plain"])}, "async_edit_message")
+    platform.async_register_entity_service("edit_message", {vol.Required("message"): cv.string, vol.Optional("message_id"): INT_STR, vol.Optional("conversation_message_id"): INT_STR, vol.Optional("attachment"): cv.string, vol.Optional("keyboard"): dict, vol.Optional("disable_mentions"): cv.boolean, vol.Optional("parse_mode", default="html"): vol.In(["html", "markdown", "markdownv2", "plain"])}, "async_edit_message")
     platform.async_register_entity_service("wall_post", {vol.Optional("message"): cv.string, vol.Optional("file"): cv.string}, "async_wall_post", supports_response=SupportsResponse.OPTIONAL)
-    platform.async_register_entity_service("delete_message", {vol.Optional("message_id"): cv.positive_int, vol.Optional("conversation_message_id"): cv.positive_int}, "async_delete_message")
+    platform.async_register_entity_service("delete_message", {vol.Optional("message_id"): INT_STR, vol.Optional("conversation_message_id"): INT_STR}, "async_delete_message")
     platform.async_register_entity_service("set_activity", {vol.Required("type"): vol.In(["typing", "audiomsg"])}, "async_set_activity")
-    platform.async_register_entity_service("send_reaction", {vol.Required("conversation_message_id"): cv.positive_int, vol.Required("reaction_id"): cv.positive_int}, "async_send_reaction")
-    platform.async_register_entity_service("pin_message", {vol.Optional("message_id"): cv.positive_int, vol.Optional("conversation_message_id"): cv.positive_int}, "async_pin_message")
-    platform.async_register_entity_service("unpin_message", {vol.Optional("message_id"): cv.positive_int, vol.Optional("conversation_message_id"): cv.positive_int}, "async_unpin_message")
-    platform.async_register_entity_service("send_sticker", {vol.Required("sticker_id"): cv.positive_int, vol.Optional("reply_to"): cv.positive_int}, "async_send_sticker", supports_response=SupportsResponse.OPTIONAL)
+    platform.async_register_entity_service("send_reaction", {vol.Required("conversation_message_id"): INT_STR, vol.Required("reaction_id"): INT_STR}, "async_send_reaction")
+    platform.async_register_entity_service("pin_message", {vol.Optional("message_id"): INT_STR, vol.Optional("conversation_message_id"): INT_STR}, "async_pin_message")
+    platform.async_register_entity_service("unpin_message", {vol.Optional("message_id"): INT_STR, vol.Optional("conversation_message_id"): INT_STR}, "async_unpin_message")
+    platform.async_register_entity_service("send_sticker", {vol.Required("sticker_id"): INT_STR, vol.Optional("reply_to"): INT_STR}, "async_send_sticker", supports_response=SupportsResponse.OPTIONAL)
     platform.async_register_entity_service("edit_chat", {vol.Required("title"): cv.string}, "async_edit_chat")
     platform.async_register_entity_service("get_user_info", {vol.Required("user_id"): vol.Any(cv.positive_int, cv.string)}, "async_get_user_info", supports_response=SupportsResponse.ONLY)
     platform.async_register_entity_service("answer_callback", {vol.Required("event_id"): cv.string, vol.Required("user_id"): vol.Any(cv.positive_int, cv.string), vol.Optional("message"): cv.string}, "async_answer_callback")
@@ -97,64 +98,41 @@ class VkNotifyEntity(NotifyEntity):
                     if isinstance(msg, dict):
                         self._last_message_id = msg.get("message_id") or msg.get("id")
                         self._last_cmid = msg.get("conversation_message_id")
-                    else: self._last_message_id = msg
+                    else: 
+                        self._last_message_id = msg
+                        self._last_cmid = None
                     self.async_write_ha_state()
                     return {"message_id": self._last_message_id, "conversation_message_id": self._last_cmid}
                 return res.get("response")
         except Exception as e: raise HomeAssistantError(f"Error: {e}")
 
-    def _prepare_reply(self, params: dict, reply_to: int | None) -> None:
+    def _prepare_reply(self, params: dict, reply_to: Any | None) -> None:
         if not reply_to: return
+        reply_to_int = int(reply_to)
         if self._peer_id >= 2000000000:
-            params["forward"] = json.dumps({"peer_id": self._peer_id, "conversation_message_ids": [reply_to], "is_reply": 1}, ensure_ascii=False)
-        else: params["reply_to"] = reply_to
-
-    def _inject_auto_answer(self, buttons_container: list) -> None:
-        """Рекурсивно ищет кнопки и безопасно инжектит флаг _ha_auto."""
-        for item in buttons_container:
-            if isinstance(item, list):
-                self._inject_auto_answer(item)
-            elif isinstance(item, dict):
-                if item.get("action", {}).get("type") == "callback":
-                    act = item["action"]
-                    p = act.get("payload", "{}")
-                    try:
-                        p_obj = json.loads(p) if isinstance(p, str) else p
-                        if not isinstance(p_obj, dict):
-                            p_obj = {"value": p_obj}
-                    except ValueError:
-                        p_obj = {"value": p}
-                    
-                    p_obj["_ha_auto"] = True
-                    act["payload"] = json.dumps(p_obj, ensure_ascii=False)
+            params["forward"] = json.dumps({"peer_id": self._peer_id, "conversation_message_ids": [reply_to_int], "is_reply": 1}, ensure_ascii=False)
+        else: params["reply_to"] = reply_to_int
 
     def _apply_common_params(self, params: dict, kwargs: dict) -> None:
         if kwargs.get("disable_mentions"): params["disable_mentions"] = 1
         if "payload" in kwargs: params["payload"] = kwargs["payload"]
-        
-        # Получаем настройку (по умолчанию True, как в services.yaml)
-        auto_answer = kwargs.get("auto_answer_callback", True)
-        
-        # Обработка обычной клавиатуры
         if "keyboard" in kwargs:
             kb = kwargs["keyboard"]
             if isinstance(kb, dict):
                 if "inline_keyboard" in kwargs: kb["inline"] = kwargs["inline_keyboard"]
                 elif "inline" not in kb: kb["inline"] = True
                 
-                if auto_answer:
-                    self._inject_auto_answer(kb.get("buttons", []))
-                        
+                if kwargs.get("auto_answer_callback"):
+                    for row in kb.get("buttons", []):
+                        for btn in row:
+                            if btn.get("action", {}).get("type") == "callback":
+                                act = btn["action"]
+                                p = act.get("payload", "{}")
+                                p_obj = json.loads(p) if isinstance(p, str) else p
+                                p_obj["_ha_auto"] = True
+                                act["payload"] = json.dumps(p_obj, ensure_ascii=False)
+                                
             params["keyboard"] = json.dumps(kb, ensure_ascii=False)
-            
-        # Обработка каруселей (Template)
-        if "template" in kwargs:
-            tpl = kwargs["template"]
-            if auto_answer and isinstance(tpl, dict) and "elements" in tpl:
-                for el in tpl.get("elements", []):
-                    if "buttons" in el:
-                        self._inject_auto_answer(el["buttons"])
-            params["template"] = json.dumps(tpl, ensure_ascii=False)
 
     async def async_send_message(self, message: str, title: str | None = None, **kwargs) -> ServiceResponse:
         if title: message = f"{title}\n\n{message}"
@@ -162,6 +140,8 @@ class VkNotifyEntity(NotifyEntity):
         params = {"message": clean_msg}
         if fmt_data: params["format_data"] = fmt_data
         if "attachment" in kwargs: params["attachment"] = kwargs["attachment"]
+        if "template" in kwargs: params["template"] = json.dumps(kwargs["template"], ensure_ascii=False)
+        if "lat" in kwargs: params["lat"], params["long"] = kwargs["lat"], kwargs["long"]
         self._apply_common_params(params, kwargs)
         self._prepare_reply(params, kwargs.get("reply_to"))
         return await self._internal_send(VK_API_SEND, params)
@@ -198,8 +178,8 @@ class VkNotifyEntity(NotifyEntity):
         if fmt_data: params["format_data"] = fmt_data
         if "attachment" in kwargs: params["attachment"] = kwargs["attachment"]
         if "keyboard" in kwargs: params["keyboard"] = json.dumps(kwargs["keyboard"], ensure_ascii=False)
-        if kwargs.get("message_id"): params["message_id"] = kwargs["message_id"]
-        elif kwargs.get("conversation_message_id"): params["conversation_message_id"] = kwargs["conversation_message_id"]
+        if kwargs.get("message_id"): params["message_id"] = int(kwargs["message_id"])
+        elif kwargs.get("conversation_message_id"): params["conversation_message_id"] = int(kwargs["conversation_message_id"])
         if kwargs.get("disable_mentions"): params["disable_mentions"] = 1
         await self._internal_send(VK_API_EDIT, params)
 
@@ -211,31 +191,33 @@ class VkNotifyEntity(NotifyEntity):
 
     async def async_delete_message(self, **kwargs) -> None:
         params = {"delete_for_all": 1}
-        if kwargs.get("message_id"): params["message_ids"] = kwargs["message_id"]
-        if kwargs.get("conversation_message_id"): params["cmids"] = kwargs["conversation_message_id"]
+        if kwargs.get("message_id"): params["message_ids"] = int(kwargs["message_id"])
+        if kwargs.get("conversation_message_id"): params["cmids"] = int(kwargs["conversation_message_id"])
         await self._internal_send(VK_API_DELETE, params)
 
-    async def async_send_reaction(self, conversation_message_id: int, reaction_id: int, **kwargs) -> None:
-        await self._internal_send(VK_API_REACTION, {"cmid": conversation_message_id, "reaction_id": reaction_id})
+    async def async_send_reaction(self, conversation_message_id: Any, reaction_id: Any, **kwargs) -> None:
+        cmid = int(conversation_message_id) if conversation_message_id else 0
+        if cmid == 0: raise HomeAssistantError("Cannot send reaction: conversation_message_id is missing or 0")
+        await self._internal_send(VK_API_REACTION, {"cmid": cmid, "reaction_id": int(reaction_id)})
 
     async def async_pin_message(self, **kwargs) -> None:
         params = {}
-        if kwargs.get("message_id"): params["message_id"] = kwargs["message_id"]
-        elif kwargs.get("conversation_message_id"): params["conversation_message_id"] = kwargs["conversation_message_id"]
+        if kwargs.get("message_id"): params["message_id"] = int(kwargs["message_id"])
+        elif kwargs.get("conversation_message_id"): params["conversation_message_id"] = int(kwargs["conversation_message_id"])
         await self._internal_send(VK_API_PIN, params)
 
     async def async_unpin_message(self, **kwargs) -> None:
         params = {}
-        if kwargs.get("message_id"): params["message_id"] = kwargs["message_id"]
-        elif kwargs.get("conversation_message_id"): params["conversation_message_id"] = kwargs["conversation_message_id"]
+        if kwargs.get("message_id"): params["message_id"] = int(kwargs["message_id"])
+        elif kwargs.get("conversation_message_id"): params["conversation_message_id"] = int(kwargs["conversation_message_id"])
         await self._internal_send(VK_API_UNPIN, params)
 
-    async def async_answer_callback(self, event_id: str, user_id: int | str, message: str | None = None, **kwargs) -> None:
-        params = {"event_id": event_id, "user_id": user_id}
+    async def async_answer_callback(self, event_id: str, user_id: Any, message: str | None = None, **kwargs) -> None:
+        params = {"event_id": event_id, "user_id": int(user_id)}
         if message: params["event_data"] = json.dumps({"type": "show_snackbar", "text": message[:90]}, ensure_ascii=False)
         await self._internal_send(VK_API_EVENT_ANSWER, params)
 
-    async def async_get_user_info(self, user_id: int | str, **kwargs) -> ServiceResponse:
+    async def async_get_user_info(self, user_id: Any, **kwargs) -> ServiceResponse:
         uid = str(user_id).replace("[VK ID: ", "").replace("]", "").strip()
         uid_int = int(uid) if uid.lstrip('-').isdigit() else 0
         if not uid_int or uid_int >= 2000000000: return {"full_name": "Система", "is_online": False}
@@ -253,8 +235,8 @@ class VkNotifyEntity(NotifyEntity):
         except Exception: pass
         return {"full_name": "Неизвестно", "is_online": False, "last_seen": 0}
 
-    async def async_send_sticker(self, sticker_id: int, **kwargs) -> ServiceResponse:
-        params = {"sticker_id": sticker_id}
+    async def async_send_sticker(self, sticker_id: Any, **kwargs) -> ServiceResponse:
+        params = {"sticker_id": int(sticker_id)}
         self._prepare_reply(params, kwargs.get("reply_to"))
         return await self._internal_send(VK_API_SEND, params)
 
