@@ -1,5 +1,5 @@
 """
-VK Notify  __init__.py v1.5.4
+VK Notify __init__.py v1.5.5
 Cleaned: All services moved to notify.py
 """
 from __future__ import annotations
