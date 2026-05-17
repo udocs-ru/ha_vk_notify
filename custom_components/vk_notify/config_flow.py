@@ -1,5 +1,5 @@
 """
-VK Notify config_flow.py v1.5.5
+VK Notify config_flow.py v1.5.6
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ from .const import (
     CONF_GROUP_ID,
     CONF_MODE,
     CONF_PEER_ID,
+    CONF_VERIFY_SSL,
     DOMAIN,
     MODE_API,
     MODE_LONGPOLL,
@@ -25,6 +26,7 @@ STEP_TOKEN_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_ACCESS_TOKEN): str,
         vol.Optional("name", default="VK Notify"): str,
+        vol.Optional(CONF_VERIFY_SSL, default=True): bool,
     }
 )
 
@@ -121,6 +123,7 @@ class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._name: str = "VK Notify"
         self._mode: str = MODE_API
         self._group_id: int | None = None
+        self._verify_ssl: bool = True
 
     async def async_step_user(self, user_input=None):
         errors = {}
@@ -136,6 +139,7 @@ class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 else:
                     self._access_token = user_input[CONF_ACCESS_TOKEN]
                     self._name = user_input.get("name", "VK Notify")
+                    self._verify_ssl = user_input.get(CONF_VERIFY_SSL, True)
                     self._group_id = await _detect_group_id(self.hass, self._access_token)
                     return await self.async_step_select_mode()
 
@@ -203,6 +207,7 @@ class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_MODE: self._mode,
                     CONF_GROUP_ID: self._group_id,
                     "name": self._name,
+                    CONF_VERIFY_SSL: self._verify_ssl,
                 },
             )
 
@@ -227,22 +232,26 @@ class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_reconfigure(self, user_input=None):
         entry = self._get_reconfigure_entry()
         self._access_token = entry.data[CONF_ACCESS_TOKEN]
+        current_verify = entry.data.get(CONF_VERIFY_SSL, True)
 
         errors = {}
         all_options, _ = await _get_conversations(self.hass, self._access_token)
 
         if user_input is not None:
             peer_id_str = str(user_input[CONF_PEER_ID]).strip()
+            new_verify = user_input.get(CONF_VERIFY_SSL, True)
             
             chat_label = all_options.get(peer_id_str, f"Чат {peer_id_str}")
             base_name = entry.data.get("name", "VK Notify")
+            
             self.hass.config_entries.async_update_entry(
-                entry, title=f"{base_name}: {chat_label}"
+                entry, title=f"{base_name}: {chat_label}",
+                data={**entry.data, CONF_PEER_ID: int(peer_id_str), CONF_VERIFY_SSL: new_verify}
             )
             
             return self.async_update_reload_and_abort(
                 entry,
-                data={**entry.data, CONF_PEER_ID: int(peer_id_str)},
+                data={**entry.data, CONF_PEER_ID: int(peer_id_str), CONF_VERIFY_SSL: new_verify},
             )
 
         options = [{"value": str(k), "label": v} for k, v in all_options.items()]
@@ -257,7 +266,8 @@ class VkNotifyConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                             custom_value=True, # РАЗРЕШАЕТ РУЧНОЙ ВВОД ПРИ ПЕРЕНАСТРОЙКЕ!
                             mode=SelectSelectorMode.DROPDOWN,
                         )
-                    )
+                    ),
+                    vol.Optional(CONF_VERIFY_SSL, default=current_verify): bool,
                 }
             ),
             errors=errors,
