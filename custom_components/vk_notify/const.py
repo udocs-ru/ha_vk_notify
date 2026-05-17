@@ -1,5 +1,5 @@
 """
-VK Notify  __init__.py v1.5.5
+VK Notify const.py v1.5.6
 Cleaned: All services moved to const.py
 """
 
@@ -9,6 +9,7 @@ CONF_ACCESS_TOKEN = "access_token"
 CONF_PEER_ID = "peer_id"
 CONF_MODE = "mode"
 CONF_GROUP_ID = "group_id"
+CONF_VERIFY_SSL = "verify_ssl"
 
 MODE_API = "api"
 MODE_LONGPOLL = "longpoll"
