@@ -1,5 +1,5 @@
 """
-VK Notify notify.py v1.5.5
+VK Notify notify.py v1.5.6
 Added: Flexible types (INT_STR) for template compatibility.
 """
 from __future__ import annotations
