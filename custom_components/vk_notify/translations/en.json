@@ -3,14 +3,16 @@
     "step": {
       "user": {
         "title": "Set up VK Notify",
-        "description": "Enter your VK community bot token.\n\n[Documentation]({docs_url})\n\n💡 **Version 1.5.5**\n📝 **What's new:** Added support for interactive buttons (Snackbars), fetching user profiles, and controlling automatic loading spinner dismissal.",
+        "description": "Enter your VK community bot token.\n\n[Documentation]({docs_url})\n\n💡 **Version 1.5.6**\n📝 **What's new:** Added support for interactive buttons (Snackbars), fetching user profiles, and controlling automatic loading spinner dismissal.",
         "data": {
           "access_token": "Access Token",
-          "name": "Name"
+          "name": "Name",
+          "verify_ssl": "Verify SSL certificates"
         },
         "data_description": {
           "access_token": "VK community bot token with Messages permission",
-          "name": "Friendly name for this notification entity"
+          "name": "Friendly name for this notification entity",
+          "verify_ssl": "DISABLE this if you send files from local IP addresses via HTTPS (fixes SSL certificate errors)."
         }
       },
       "select_mode": {
@@ -28,10 +30,14 @@
         }
       },
       "reconfigure": {
-        "title": "Change chat",
-        "description": "Select a new chat to send notifications to.",
+        "title": "Change chat and settings",
+        "description": "Select a new chat to send notifications to or change SSL settings.",
         "data": {
-          "peer_id": "Chat"
+          "peer_id": "Chat",
+          "verify_ssl": "Verify SSL certificates"
+        },
+        "data_description": {
+          "verify_ssl": "DISABLE this if you send files from local IP addresses via HTTPS (fixes SSL certificate errors)."
         }
       }
     },
