@@ -1005,6 +1005,10 @@ data:
 
 ---
 
+## 🤖 Готовые автоматизации: [Проекты(blueprints)](https://github.com/Eugen417/homeassistant-blueprints/tree/main)
+
+---
+
 <details>
   <summary><b>🖼 Скриншоты установки и настройки (Нажмите, чтобы развернуть)</b></summary>
   <br>
