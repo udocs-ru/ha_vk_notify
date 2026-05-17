@@ -1,5 +1,5 @@
 """
-VK Notify helpers.py v1.5.5
+VK Notify helpers.py v1.5.6
 Cleaned: Removed native video upload. Kept MarkdownV2, Photo, and File logic.
 """
 
@@ -98,9 +98,9 @@ def parse_vk_formatting(text: str, parse_mode: str = "html") -> tuple[str, str |
 # 2. ФУНКЦИИ ЗАГРУЗКИ МЕДИАФАЙЛОВ
 # ==========================================
 
-async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: int, url: str | None = None, filepath: str | None = None) -> str:
+async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: int, url: str | None = None, filepath: str | None = None, verify_ssl: bool = True) -> str:
     """Загрузка фотографии в ВК."""
-    session = async_get_clientsession(hass)
+    session = async_get_clientsession(hass, verify_ssl=verify_ssl)
     
     async with session.get(VK_API_PHOTO_UPLOAD_SERVER, params={
         "access_token": access_token, "peer_id": peer_id, "v": VK_API_VERSION
@@ -140,9 +140,9 @@ async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: in
     access_key = photo.get("access_key", "")
     return f"photo{photo['owner_id']}_{photo['id']}{'_' + access_key if access_key else ''}"
 
-async def async_upload_file(hass: HomeAssistant, access_token: str, peer_id: int, filepath: str) -> str:
+async def async_upload_file(hass: HomeAssistant, access_token: str, peer_id: int, filepath: str, verify_ssl: bool = True) -> str:
     """Загрузка документов и голосовых сообщений."""
-    session = async_get_clientsession(hass)
+    session = async_get_clientsession(hass, verify_ssl=verify_ssl)
     if not hass.config.is_allowed_path(filepath):
         raise HomeAssistantError(f"Path '{filepath}' not allowed.")
         
