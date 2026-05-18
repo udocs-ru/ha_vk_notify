@@ -1,3 +1,4 @@
+[![HA Validation](https://img.shields.io/github/actions/workflow/status/Eugen417/homeassistant-blueprints/ha-validate.yml?style=for-the-badge&label=HA%20Validation)](https://github.com/Eugen417/homeassistant-blueprints/actions/workflows/ha-validate.yml)
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![GitHub Release](https://img.shields.io/github/v/release/udocs-ru/ha_vk_notify?style=for-the-badge)](https://github.com/udocs-ru/ha_vk_notify/releases)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-compatible-blue.svg?style=for-the-badge&logo=home-assistant)](https://www.home-assistant.io/)
