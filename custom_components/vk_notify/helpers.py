@@ -1,6 +1,6 @@
 """
-VK Notify helpers.py v1.5.7
-Fixed: Explicit ssl=False parameter for image downloads.
+VK Notify helpers.py v1.5.8
+Fixed: Safe file reading with context manager, added logging.
 """
 
 from __future__ import annotations
@@ -8,6 +8,7 @@ from __future__ import annotations
 import aiohttp
 import re
 import json
+import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -19,6 +20,8 @@ from .const import (
     VK_API_PHOTO_UPLOAD_SERVER, 
     VK_API_VERSION
 )
+
+_LOGGER = logging.getLogger(__name__)
 
 # ==========================================
 # 1. ФУНКЦИИ ФОРМАТИРОВАНИЯ ТЕКСТА
@@ -98,6 +101,11 @@ def parse_vk_formatting(text: str, parse_mode: str = "html") -> tuple[str, str |
 # 2. ФУНКЦИИ ЗАГРУЗКИ МЕДИАФАЙЛОВ
 # ==========================================
 
+def _read_file_safe(path: str) -> bytes:
+    """Безопасное чтение файла с гарантированным закрытием."""
+    with open(path, "rb") as f:
+        return f.read()
+
 async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: int, url: str | None = None, filepath: str | None = None, verify_ssl: bool = True) -> str:
     """Загрузка фотографии в ВК."""
     session = async_get_clientsession(hass, verify_ssl=verify_ssl)
@@ -106,20 +114,29 @@ async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: in
         "access_token": access_token, "peer_id": peer_id, "v": VK_API_VERSION
     }) as resp:
         data = await resp.json()
-    if "error" in data: raise HomeAssistantError(f"VK API error (photos.getMessagesUploadServer): {data['error']}")
+    if "error" in data:
+        _LOGGER.error("VK API error getting photo upload server: %s", data['error'])
+        raise HomeAssistantError(f"VK API error (photos.getMessagesUploadServer): {data['error']}")
     
     upload_url = data["response"]["upload_url"]
     form = aiohttp.FormData()
 
     if url:
-        # ВАЖНО: Явное отключение проверки SSL конкретно для этого запроса
         ssl_ctx = None if verify_ssl else False
-        async with session.get(url, ssl=ssl_ctx) as img_resp:
-            form.add_field("photo", await img_resp.read(), filename="image.jpg")
+        try:
+            async with session.get(url, ssl=ssl_ctx) as img_resp:
+                img_resp.raise_for_status()
+                form.add_field("photo", await img_resp.read(), filename="image.jpg")
+        except Exception as e:
+            _LOGGER.error("Failed to download image from URL %s: %s", url, e)
+            raise HomeAssistantError(f"Failed to download image: {e}")
     elif filepath:
         if not hass.config.is_allowed_path(filepath):
+            _LOGGER.error("Attempted to read from unauthorized path: %s", filepath)
             raise HomeAssistantError(f"Path '{filepath}' not allowed.")
-        file_bytes = await hass.async_add_executor_job(lambda: open(filepath, "rb").read())
+        
+        # БЕЗОПАСНОЕ ЧТЕНИЕ ФАЙЛА
+        file_bytes = await hass.async_add_executor_job(_read_file_safe, filepath)
         form.add_field("photo", file_bytes, filename=filepath.split("/")[-1])
     else:
         raise HomeAssistantError("Neither URL nor filepath provided for photo upload.")
@@ -128,6 +145,7 @@ async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: in
         upload_result = await resp.json()
 
     if "error" in upload_result or not upload_result.get("photo"):
+        _LOGGER.error("VK Photo upload error: %s", upload_result)
         raise HomeAssistantError(f"Photo upload error: {upload_result}")
 
     async with session.post(VK_API_PHOTO_SAVE, data={
@@ -136,7 +154,9 @@ async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: in
     }) as resp:
         data = await resp.json()
         
-    if "error" in data: raise HomeAssistantError(f"VK API error (photos.saveMessagesPhoto): {data['error']}")
+    if "error" in data:
+        _LOGGER.error("VK API error saving photo: %s", data['error'])
+        raise HomeAssistantError(f"VK API error (photos.saveMessagesPhoto): {data['error']}")
 
     photo = data["response"][0]
     access_key = photo.get("access_key", "")
@@ -145,7 +165,9 @@ async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: in
 async def async_upload_file(hass: HomeAssistant, access_token: str, peer_id: int, filepath: str, verify_ssl: bool = True) -> str:
     """Загрузка документов и голосовых сообщений."""
     session = async_get_clientsession(hass, verify_ssl=verify_ssl)
+    
     if not hass.config.is_allowed_path(filepath):
+        _LOGGER.error("Attempted to read from unauthorized path: %s", filepath)
         raise HomeAssistantError(f"Path '{filepath}' not allowed.")
         
     doc_type = "audio_message" if filepath.lower().endswith(".ogg") else "doc"
@@ -154,11 +176,15 @@ async def async_upload_file(hass: HomeAssistant, access_token: str, peer_id: int
         "access_token": access_token, "peer_id": peer_id, "type": doc_type, "v": VK_API_VERSION
     }) as resp:
         data = await resp.json()
-    if "error" in data: raise HomeAssistantError(f"VK API error (docs.getUploadServer): {data['error']}")
+    if "error" in data:
+        _LOGGER.error("VK API error getting doc upload server: %s", data['error'])
+        raise HomeAssistantError(f"VK API error (docs.getUploadServer): {data['error']}")
     
     upload_url = data["response"]["upload_url"]
     filename = filepath.split("/")[-1]
-    file_bytes = await hass.async_add_executor_job(lambda: open(filepath, "rb").read())
+    
+    # БЕЗОПАСНОЕ ЧТЕНИЕ ФАЙЛА
+    file_bytes = await hass.async_add_executor_job(_read_file_safe, filepath)
     
     form = aiohttp.FormData()
     form.add_field("file", file_bytes, filename=filename)
@@ -170,7 +196,10 @@ async def async_upload_file(hass: HomeAssistant, access_token: str, peer_id: int
         "access_token": access_token, "v": VK_API_VERSION, "file": upload_result["file"], "title": filename
     }) as resp:
         data = await resp.json()
-    if "error" in data: raise HomeAssistantError(f"VK API error (docs.save): {data['error']}")
+        
+    if "error" in data:
+        _LOGGER.error("VK API error saving document: %s", data['error'])
+        raise HomeAssistantError(f"VK API error (docs.save): {data['error']}")
 
     response = data["response"]
     obj = response.get("doc") or response.get("audio_message")
