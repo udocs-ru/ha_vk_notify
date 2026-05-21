@@ -1,6 +1,6 @@
 """
-VK Notify helpers.py v1.5.6
-Cleaned: Removed native video upload. Kept MarkdownV2, Photo, and File logic.
+VK Notify helpers.py v1.5.7
+Fixed: Explicit ssl=False parameter for image downloads.
 """
 
 from __future__ import annotations
@@ -112,7 +112,9 @@ async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: in
     form = aiohttp.FormData()
 
     if url:
-        async with session.get(url) as img_resp:
+        # ВАЖНО: Явное отключение проверки SSL конкретно для этого запроса
+        ssl_ctx = None if verify_ssl else False
+        async with session.get(url, ssl=ssl_ctx) as img_resp:
             form.add_field("photo", await img_resp.read(), filename="image.jpg")
     elif filepath:
         if not hass.config.is_allowed_path(filepath):
