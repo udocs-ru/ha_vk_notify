@@ -1,4 +1,4 @@
-# VK Notify services.yaml v1.5.6 (Terminology & Full UI Descriptions Update)
+# VK Notify services.yaml v1.6.0 (Added send_video)
 send_message:
   name: "Отправить сообщение"
   description: Отправляет текстовое уведомление, медиа, координаты или карусель.
@@ -52,19 +52,15 @@ send_message:
     inline_keyboard:
       name: "Инлайн-клавиатура / Меню (клавиатура)"
       description: >
-        ВКЛ Инлайн-клавиатура: Кнопки «встроены» прямо в само сообщение (в тот же пузырь, где текст). 
-        Они «тихие», потому что позволяют использовать тип callback, который не спамит текстом в чат. 
-        При прокрутке истории такие кнопки уезжают вверх вместе с сообщением.
-        ВЫКЛ Меню (Обычная клавиатура): Это те самые кнопки, которые заменяют собой стандартную клавиатуру 
-        телефона в нижней части экрана. Они «висят» внизу, пока ты их не удалишь или не заменишь на другие, 
-        независимо от того, как далеко ты прокрутил чат.
+        ВКЛ Инлайн-клавиатура: Кнопки «встроены» прямо в само сообщение.
+        ВЫКЛ Меню (Обычная клавиатура): Кнопки заменяют клавиатуру телефона.
       required: false
       default: true
       selector:
         boolean: {}
     auto_answer_callback:
       name: Автоматически гасить кружок (Spinner)
-      description: "ВКЛ (Рекомендуется): Интеграция сама мгновенно остановит загрузку на кнопке. ВЫКЛ: Кружок будет висеть, пока вы не ответите службой 'answer_callback' в автоматизации (нужно для Снэкбаров)."
+      description: "ВКЛ (Рекомендуется): Интеграция сама мгновенно остановит загрузку на кнопке."
       required: false
       default: true
       selector:
@@ -204,6 +200,85 @@ send_file:
     parse_mode:
       name: Режим разбора
       description: "Парсер текста сообщения."
+      default: html
+      selector:
+        select:
+          mode: list
+          options:
+            - label: "HTML"
+              value: html
+            - label: "Markdown (Устаревший)"
+              value: markdown
+            - label: "MarkdownV2"
+              value: markdownv2
+            - label: "Обычный текст"
+              value: plain
+    disable_mentions:
+      name: Без звука для упоминаний
+      required: false
+      default: false
+      selector:
+        boolean: {}
+    payload:
+      name: Скрытые данные (Payload)
+      required: false
+      selector:
+        text: {}
+    inline_keyboard:
+      name: "Инлайн-клавиатура / Меню (клавиатура)"
+      default: true
+      selector:
+        boolean: {}
+    auto_answer_callback:
+      name: Автоматически гасить кружок
+      default: true
+      selector:
+        boolean: {}
+    keyboard:
+      name: Клавиатура
+      required: false
+      selector:
+        object: {}
+    reply_to:
+      name: Ответить на сообщение
+      required: false
+      selector:
+        text: {}
+
+send_video:
+  name: "Отправить видео"
+  description: "Отправляет видеофайл (.mp4) как нативное видео с плеером ВКонтакте. ВНИМАНИЕ: Требуется токен пользователя!"
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    video_access_token:
+      name: Токен пользователя (User Token)
+      description: "Токен реального профиля ВК с правами video и messages. Обязателен для загрузки видео."
+      required: true
+      selector:
+        text: {}
+    file:
+      name: Локальный путь к файлу
+      description: "Например, /media/frigate/clip.mp4"
+      required: false
+      selector:
+        text: {}
+    url:
+      name: URL видео
+      description: "Прямая ссылка на видео в локальной сети или интернете (идеально для Frigate)."
+      required: false
+      selector:
+        text: {}
+    message:
+      name: Подпись к видео
+      required: false
+      selector:
+        text:
+          multiline: true
+    parse_mode:
+      name: Режим разбора
       default: html
       selector:
         select:
@@ -537,51 +612,4 @@ pin_message:
   target:
     entity:
       integration: vk_notify
-      domain: notify
-  fields:
-    conversation_message_id:
-      name: Идентификатор сообщения (cmid)
-      required: true
-      selector:
-        text: {}
-
-unpin_message:
-  name: "Открепить сообщение"
-  description: "Открепляет сообщение в шапке беседы. Если ID не передан, открепит текущее закрепленное."
-  target:
-    entity:
-      integration: vk_notify
-      domain: notify
-  fields:
-    conversation_message_id:
-      name: Идентификатор сообщения (cmid)
-      required: false
-      selector:
-        text: {}
-
-answer_callback:
-  name: "Ответить на нажатие (Снэкбар)"
-  description: "Останавливает загрузку на кнопке и (опционально) показывает всплывающее уведомление (снэкбар) в приложении ВК."
-  target:
-    entity:
-      integration: vk_notify
-      domain: notify
-  fields:
-    event_id:
-      name: Event ID
-      description: "Идентификатор события (из trigger.event.data.event_id)."
-      required: true
-      selector:
-        text: {}
-    user_id:
-      name: User ID
-      description: "VK ID пользователя, нажавшего кнопку (из trigger.event.data.user_id)."
-      required: true
-      selector:
-        text: {}
-    message:
-      name: Текст (Снэкбар)
-      description: "Текст уведомления (максимум 90 символов). Если оставить пустым, кнопка просто перестанет крутиться."
-      required: false
-      selector:
-        text: {}
+      domain:
