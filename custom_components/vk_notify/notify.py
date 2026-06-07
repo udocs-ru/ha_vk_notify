@@ -1,6 +1,6 @@
 """
-VK Notify notify.py v1.5.6
-Added: Flexible types (INT_STR) for template compatibility.
+VK Notify notify.py v1.6.0
+Added: send_video service for native player.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import entity_platform
 
 from .const import CONF_ACCESS_TOKEN, CONF_PEER_ID, VK_API_VERSION
-from .helpers import async_upload_file, async_upload_photo, parse_vk_formatting
+from .helpers import async_upload_file, async_upload_photo, async_upload_video, parse_vk_formatting
 
 VK_API_SEND = "https://api.vk.com/method/messages.send"
 VK_API_EDIT = "https://api.vk.com/method/messages.edit"
@@ -52,6 +52,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     platform.async_register_entity_service("send_message", {vol.Required("message"): cv.string, vol.Optional("title"): cv.string, vol.Optional("attachment"): cv.string, vol.Optional("template"): dict, vol.Optional("lat"): cv.string, vol.Optional("long"): cv.string, **COMMON_FIELDS}, "async_send_message", supports_response=SupportsResponse.OPTIONAL)
     platform.async_register_entity_service("send_photo", {vol.Optional("url"): cv.string, vol.Optional("file"): cv.string, vol.Optional("message"): cv.string, **COMMON_FIELDS}, "async_send_photo", supports_response=SupportsResponse.OPTIONAL)
     platform.async_register_entity_service("send_file", {vol.Required("file"): cv.string, vol.Optional("message"): cv.string, **COMMON_FIELDS}, "async_send_file", supports_response=SupportsResponse.OPTIONAL)
+    platform.async_register_entity_service("send_video", {vol.Required("video_access_token"): cv.string, vol.Optional("url"): cv.string, vol.Optional("file"): cv.string, vol.Optional("message"): cv.string, **COMMON_FIELDS}, "async_send_video", supports_response=SupportsResponse.OPTIONAL)
     platform.async_register_entity_service("send_voice", {vol.Required("file"): cv.string, vol.Optional("message"): cv.string, **COMMON_FIELDS}, "async_send_voice", supports_response=SupportsResponse.OPTIONAL)
     platform.async_register_entity_service("edit_message", {vol.Required("message"): cv.string, vol.Optional("message_id"): INT_STR, vol.Optional("conversation_message_id"): INT_STR, vol.Optional("attachment"): cv.string, vol.Optional("keyboard"): dict, vol.Optional("disable_mentions"): cv.boolean, vol.Optional("parse_mode", default="html"): vol.In(["html", "markdown", "markdownv2", "plain"])}, "async_edit_message")
     platform.async_register_entity_service("wall_post", {vol.Optional("message"): cv.string, vol.Optional("file"): cv.string}, "async_wall_post", supports_response=SupportsResponse.OPTIONAL)
@@ -159,6 +160,23 @@ class VkNotifyEntity(NotifyEntity):
     async def async_send_file(self, **kwargs) -> ServiceResponse:
         clean_msg, fmt_data = parse_vk_formatting(kwargs.get("message", ""), kwargs.get("parse_mode", "html"))
         params = {"message": clean_msg, "attachment": await async_upload_file(self.hass, self._access_token, self._peer_id, kwargs["file"])}
+        if fmt_data: params["format_data"] = fmt_data
+        self._apply_common_params(params, kwargs)
+        self._prepare_reply(params, kwargs.get("reply_to"))
+        return await self._internal_send(VK_API_SEND, params)
+
+    async def async_send_video(self, **kwargs) -> ServiceResponse:
+        clean_msg, fmt_data = parse_vk_formatting(kwargs.get("message", ""), kwargs.get("parse_mode", "html"))
+        params = {"message": clean_msg}
+        params["attachment"] = await async_upload_video(
+            self.hass, 
+            self._access_token, 
+            self._peer_id, 
+            video_access_token=kwargs["video_access_token"],
+            url=kwargs.get("url"), 
+            filepath=kwargs.get("file"),
+            caption=clean_msg
+        )
         if fmt_data: params["format_data"] = fmt_data
         self._apply_common_params(params, kwargs)
         self._prepare_reply(params, kwargs.get("reply_to"))
