@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Set up VK Notify",
-        "description": "Enter your VK community bot token.\n\n[Documentation]({docs_url})\n\n💡 **Version 1.6.0**\n📝 **What's new:** Added native video upload support (send_video service) and built-in SSL bypass for local Frigate cameras.",
+        "description": "Enter your VK community bot token.\n\n[Documentation]({docs_url})\n\n💡 **Version 1.6.1**\n📝 **What's new:** Added full support for dynamic timeout handling (`timeout`) across media sending operations directly within automation configurations.",
         "data": {
           "access_token": "Access Token",
           "name": "Name",
@@ -115,6 +115,10 @@
           "name": "Longitude",
           "description": "Longitude coordinate for geolocation."
         },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Maximum response wait time from VK servers (in seconds)."
+        },
         "reply_to": {
           "name": "Reply to message",
           "description": "Message ID (cmid) in the chat to reply to."
@@ -161,6 +165,10 @@
           "name": "Keyboard",
           "description": "JSON object for inline or regular keyboard."
         },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Maximum response wait time from VK servers (in seconds)."
+        },
         "reply_to": {
           "name": "Reply to message",
           "description": "Message ID (cmid) in the chat to reply to."
@@ -202,6 +210,10 @@
         "keyboard": {
           "name": "Keyboard",
           "description": "JSON object for inline or regular keyboard."
+        },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Maximum response wait time from VK servers (in seconds)."
         },
         "reply_to": {
           "name": "Reply to message",
@@ -253,6 +265,10 @@
           "name": "Keyboard",
           "description": "JSON object for inline or regular keyboard."
         },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Maximum response wait time from VK servers (in seconds)."
+        },
         "reply_to": {
           "name": "Reply to message",
           "description": "Message ID (cmid) in the chat to reply to."
@@ -294,6 +310,10 @@
         "keyboard": {
           "name": "Keyboard",
           "description": "JSON object for inline or regular keyboard."
+        },
+        "timeout": {
+          "name": "Timeout",
+          "description": "Maximum response wait time from VK servers (in seconds)."
         },
         "reply_to": {
           "name": "Reply to message",
