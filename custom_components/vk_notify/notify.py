@@ -1,6 +1,6 @@
 """
-VK Notify notify.py v1.6.0
-Added: send_video service for native player.
+VK Notify notify.py v1.6.1
+Added: Custom timeout handling passed from service calls.
 """
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers import entity_platform
+import aiohttp
 
 from .const import CONF_ACCESS_TOKEN, CONF_PEER_ID, VK_API_VERSION
 from .helpers import async_upload_file, async_upload_photo, async_upload_video, parse_vk_formatting
@@ -46,6 +47,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
         vol.Optional("inline_keyboard"): cv.boolean,
         vol.Optional("auto_answer_callback"): cv.boolean,
         vol.Optional("reply_to"): INT_STR,
+        vol.Optional("timeout", default=60): cv.positive_int,
         vol.Optional("parse_mode", default="html"): vol.In(["html", "markdown", "markdownv2", "plain"])
     }
 
@@ -82,7 +84,7 @@ class VkNotifyEntity(NotifyEntity):
     def extra_state_attributes(self) -> dict[str, Any]:
         return {"peer_id": self._peer_id, "last_message_id": self._last_message_id, "last_cmid": self._last_cmid}
 
-    async def _internal_send(self, endpoint: str, params: dict) -> ServiceResponse:
+    async def _internal_send(self, endpoint: str, params: dict, timeout: int = 60) -> ServiceResponse:
         session = async_get_clientsession(self.hass)
         params.update({"access_token": self._access_token, "v": VK_API_VERSION})
         if endpoint == VK_API_SEND:
@@ -91,7 +93,7 @@ class VkNotifyEntity(NotifyEntity):
         else: params.setdefault("peer_id", self._peer_id)
 
         try:
-            async with session.post(endpoint, data=params) as resp:
+            async with session.post(endpoint, data=params, timeout=aiohttp.ClientTimeout(total=timeout)) as resp:
                 res = await resp.json()
                 if "error" in res: raise HomeAssistantError(f"VK API Error: {res['error']}")
                 if endpoint == VK_API_SEND and "response" in res:
@@ -145,29 +147,51 @@ class VkNotifyEntity(NotifyEntity):
         if "lat" in kwargs: params["lat"], params["long"] = kwargs["lat"], kwargs["long"]
         self._apply_common_params(params, kwargs)
         self._prepare_reply(params, kwargs.get("reply_to"))
-        return await self._internal_send(VK_API_SEND, params)
+        timeout = kwargs.get("timeout", 60)
+        return await self._internal_send(VK_API_SEND, params, timeout=timeout)
 
     async def async_send_photo(self, **kwargs) -> ServiceResponse:
         clean_msg, fmt_data = parse_vk_formatting(kwargs.get("message", ""), kwargs.get("parse_mode", "html"))
         params = {"message": clean_msg}
+        timeout = kwargs.get("timeout", 60)
         if "url" in kwargs or "file" in kwargs:
-            params["attachment"] = await async_upload_photo(self.hass, self._access_token, self._peer_id, url=kwargs.get("url"), filepath=kwargs.get("file"))
+            params["attachment"] = await async_upload_photo(
+                self.hass, 
+                self._access_token, 
+                self._peer_id, 
+                url=kwargs.get("url"), 
+                filepath=kwargs.get("file"),
+                verify_ssl=self._entry.data.get("verify_ssl", True),
+                timeout=timeout
+            )
         if fmt_data: params["format_data"] = fmt_data
         self._apply_common_params(params, kwargs)
         self._prepare_reply(params, kwargs.get("reply_to"))
-        return await self._internal_send(VK_API_SEND, params)
+        return await self._internal_send(VK_API_SEND, params, timeout=timeout)
 
     async def async_send_file(self, **kwargs) -> ServiceResponse:
         clean_msg, fmt_data = parse_vk_formatting(kwargs.get("message", ""), kwargs.get("parse_mode", "html"))
-        params = {"message": clean_msg, "attachment": await async_upload_file(self.hass, self._access_token, self._peer_id, kwargs["file"])}
+        timeout = kwargs.get("timeout", 60)
+        params = {
+            "message": clean_msg, 
+            "attachment": await async_upload_file(
+                self.hass, 
+                self._access_token, 
+                self._peer_id, 
+                kwargs["file"],
+                verify_ssl=self._entry.data.get("verify_ssl", True),
+                timeout=timeout
+            )
+        }
         if fmt_data: params["format_data"] = fmt_data
         self._apply_common_params(params, kwargs)
         self._prepare_reply(params, kwargs.get("reply_to"))
-        return await self._internal_send(VK_API_SEND, params)
+        return await self._internal_send(VK_API_SEND, params, timeout=timeout)
 
     async def async_send_video(self, **kwargs) -> ServiceResponse:
         clean_msg, fmt_data = parse_vk_formatting(kwargs.get("message", ""), kwargs.get("parse_mode", "html"))
         params = {"message": clean_msg}
+        timeout = kwargs.get("timeout", 60)
         params["attachment"] = await async_upload_video(
             self.hass, 
             self._access_token, 
@@ -175,20 +199,33 @@ class VkNotifyEntity(NotifyEntity):
             video_access_token=kwargs["video_access_token"],
             url=kwargs.get("url"), 
             filepath=kwargs.get("file"),
-            caption=clean_msg
+            caption=clean_msg,
+            verify_ssl=self._entry.data.get("verify_ssl", True),
+            timeout=timeout
         )
         if fmt_data: params["format_data"] = fmt_data
         self._apply_common_params(params, kwargs)
         self._prepare_reply(params, kwargs.get("reply_to"))
-        return await self._internal_send(VK_API_SEND, params)
+        return await self._internal_send(VK_API_SEND, params, timeout=timeout)
 
     async def async_send_voice(self, **kwargs) -> ServiceResponse:
         clean_msg, fmt_data = parse_vk_formatting(kwargs.get("message", ""), kwargs.get("parse_mode", "html"))
-        params = {"message": clean_msg, "attachment": await async_upload_file(self.hass, self._access_token, self._peer_id, kwargs["file"])}
+        timeout = kwargs.get("timeout", 60)
+        params = {
+            "message": clean_msg, 
+            "attachment": await async_upload_file(
+                self.hass, 
+                self._access_token, 
+                self._peer_id, 
+                kwargs["file"],
+                verify_ssl=self._entry.data.get("verify_ssl", True),
+                timeout=timeout
+            )
+        }
         if fmt_data: params["format_data"] = fmt_data
         self._apply_common_params(params, kwargs)
         self._prepare_reply(params, kwargs.get("reply_to"))
-        return await self._internal_send(VK_API_SEND, params)
+        return await self._internal_send(VK_API_SEND, params, timeout=timeout)
 
     async def async_edit_message(self, message: str, **kwargs) -> None:
         clean_msg, fmt_data = parse_vk_formatting(message, kwargs.get("parse_mode", "html"))
