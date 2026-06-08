@@ -1,4 +1,4 @@
-# VK Notify services.yaml v1.6.0 (Added send_video)
+# VK Notify services.yaml v1.6.1 (Added dynamic timeout field)
 send_message:
   name: "Отправить сообщение"
   description: Отправляет текстовое уведомление, медиа, координаты или карусель.
@@ -95,6 +95,16 @@ send_message:
       required: false
       selector:
         text: {}
+    timeout:
+      name: Таймаут соединения
+      description: "Максимальное время ожидания ответа от серверов ВК (в секундах)."
+      required: false
+      default: 60
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: "сек"
     reply_to:
       name: Ответить на сообщение
       description: Идентификатор сообщения (cmid) в беседе, на которое нужно ответить.
@@ -141,7 +151,7 @@ send_photo:
         text: {}
     url:
       name: URL картинки
-      description: Прямая ссылка на картинку в интернете.
+      description: Пмямая ссылка на картинку в интернете.
       required: false
       selector:
         text: {}
@@ -171,6 +181,16 @@ send_photo:
       required: false
       selector:
         object: {}
+    timeout:
+      name: Таймаут соединения
+      description: "Максимальное время ожидания ответа от серверов ВК (в секундах)."
+      required: false
+      default: 60
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: "сек"
     reply_to:
       name: Ответить на сообщение
       required: false
@@ -239,6 +259,16 @@ send_file:
       required: false
       selector:
         object: {}
+    timeout:
+      name: Таймаут соединения
+      description: "Максимальное время ожидания ответа от серверов ВК (в секундах)."
+      required: false
+      default: 60
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: "сек"
     reply_to:
       name: Ответить на сообщение
       required: false
@@ -318,6 +348,16 @@ send_video:
       required: false
       selector:
         object: {}
+    timeout:
+      name: Таймаут соединения
+      description: "Максимальное время ожидания ответа от серверов ВК (в секундах)."
+      required: false
+      default: 60
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: "сек"
     reply_to:
       name: Ответить на сообщение
       required: false
@@ -386,6 +426,16 @@ send_voice:
       required: false
       selector:
         object: {}
+    timeout:
+      name: Таймаут соединения
+      description: "Максимальное время ожидания ответа от серверов ВК (в секундах)."
+      required: false
+      default: 60
+      selector:
+        number:
+          min: 5
+          max: 600
+          unit_of_measurement: "сек"
     reply_to:
       name: Ответить на сообщение
       required: false
@@ -612,4 +662,51 @@ pin_message:
   target:
     entity:
       integration: vk_notify
-      domain:
+      domain: notify
+  fields:
+    conversation_message_id:
+      name: Идентификатор сообщения (cmid)
+      required: true
+      selector:
+        text: {}
+
+unpin_message:
+  name: "Открепить сообщение"
+  description: "Открепляет сообщение в шапке беседы. Если ID не передан, открепит текущее закрепленное."
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    conversation_message_id:
+      name: Идентификатор сообщения (cmid)
+      required: false
+      selector:
+        text: {}
+
+answer_callback:
+  name: "Ответить на нажатие (Снэкбар)"
+  description: "Останавливает загрузку на кнопке и (опционально) показывает всплывающее уведомление (снэкбар) в приложении ВК."
+  target:
+    entity:
+      integration: vk_notify
+      domain: notify
+  fields:
+    event_id:
+      name: Event ID
+      description: "Идентификатор события (из trigger.event.data.event_id)."
+      required: true
+      selector:
+        text: {}
+    user_id:
+      name: User ID
+      description: "VK ID пользователя, нажавшего кнопку (из trigger.event.data.user_id)."
+      required: true
+      selector:
+        text: {}
+    message:
+      name: Текст (Снэкбар)
+      description: "Текст уведомления (максимум 90 символов). Если оставить пустым, кнопка просто перестанет крутиться."
+      required: false
+      selector:
+        text: {}
