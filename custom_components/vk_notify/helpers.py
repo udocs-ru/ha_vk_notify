@@ -151,15 +151,23 @@ async def async_upload_photo(hass: HomeAssistant, access_token: str, peer_id: in
     else:
         raise HomeAssistantError("Neither URL nor filepath provided for photo upload.")
 
-    async with session.post(upload_url, data=form, timeout=timeout_ctx) as resp:
-        try:
-            upload_result = await resp.json()
-        except Exception:
-            err_text = await resp.text()
-            raise HomeAssistantError(f"Сервер загрузки ВКонтакте недоступен (HTTP {resp.status}). Попробуйте позже.")
+    tries = 1
+    while True:
+        async with session.post(upload_url, data=form, timeout=timeout_ctx) as resp:
+            try:
+                upload_result = await resp.json()
+            except Exception:
+                err_text = await resp.text()
+                raise HomeAssistantError(f"Сервер загрузки ВКонтакте недоступен (HTTP {resp.status}). Попробуйте позже.")
 
-    if "error" in upload_result or not upload_result.get("photo"):
-        raise HomeAssistantError(f"Photo upload error: {upload_result}")
+        if "error" in upload_result or not upload_result.get("photo"):
+            _LOGGER.error(f"Photo upload error:({tries}) {upload_result}")
+            if tries > 2:
+                raise HomeAssistantError(f"Photo upload error:({tries}) {upload_result}")
+            tries += 1
+        else:
+            _LOGGER.warning(f"Photo upload result:({tries}) {upload_result}")
+            break
 
     async with session.post(VK_API_PHOTO_SAVE, data={
         "access_token": access_token, "v": VK_API_VERSION,
